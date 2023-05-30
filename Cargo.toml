@@ -7,3 +7,5 @@ edition = "2021"
 
 [dependencies]
 num-bigint = "0.4"
+thiserror = { version = "1.0.32", default-features = false }
+anyhow = "1.0"
