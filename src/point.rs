@@ -98,5 +98,29 @@ mod point_tests {
     #[test]
     fn test_create_valid_point_at_infinity() {
         assert_eq!(Point::<5,7>::new_infinity(), Point::<5,7>::Infinity);
+    }
+
+    #[test]
+    fn test_eq() {
+        assert!(Point::<5,7>::new_infinity() == Point::<5,7>::Infinity);
+        assert!(Point::<5, 7>::Point(-1.to_bigint().unwrap(), -1.to_bigint().unwrap()) == Point::<5, 7>::Point(-1.to_bigint().unwrap(), -1.to_bigint().unwrap()));
+        assert!(Point::<5, 7>::Point(-1.to_bigint().unwrap(), -1.to_bigint().unwrap()) != Point::<5, 7>::Point(-1.to_bigint().unwrap(), 1.to_bigint().unwrap())); 
+        assert!(Point::<5, 7>::Infinity != Point::<5, 7>::Point(-1.to_bigint().unwrap(), 1.to_bigint().unwrap()));  
     } 
+
+    #[test]
+    fn test_add_infinity_to_point() {
+        let infinity = Point::<5,7>::new_infinity();
+        let point = Point::<5,7>::new_point(-1.to_bigint().unwrap(),-1.to_bigint().unwrap()).unwrap();
+
+        assert_eq!(infinity + point, Point::<5,7>::new_point(-1.to_bigint().unwrap(),-1.to_bigint().unwrap()).unwrap());
+    }
+
+    #[test]
+    fn test_add_infinity_to_point_reverse() {
+        let infinity = Point::<5,7>::new_infinity();
+        let point = Point::<5,7>::new_point(-1.to_bigint().unwrap(),-1.to_bigint().unwrap()).unwrap();
+
+        assert_eq!(point + infinity, Point::<5,7>::new_point(-1.to_bigint().unwrap(),-1.to_bigint().unwrap()).unwrap());
+    }
 }
