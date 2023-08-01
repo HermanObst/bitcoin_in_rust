@@ -2,12 +2,14 @@
 use num_bigint::BigInt;
 use num_bigint::ToBigInt;
 
+
 #[derive(Debug, PartialEq, Eq)]
 struct FieldElement {
     num: BigInt,
     prime: BigInt,
 }
 
+#[allow(dead_code)]
 impl FieldElement {
     fn new(num: BigInt, prime: BigInt) -> FieldElement {
         FieldElement {
