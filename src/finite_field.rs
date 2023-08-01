@@ -4,26 +4,26 @@ use num_bigint::ToBigInt;
 use std::ops::{Add, Div, Mul, Sub};
 
 
-#[derive(Debug, PartialEq, Eq)]
-struct FieldElement {
+#[derive(Debug, PartialEq, Eq, Clone)]
+pub(crate) struct FieldElement {
     num: BigInt,
     prime: BigInt,
 }
 
 #[allow(dead_code)]
 impl FieldElement {
-    fn new(num: BigInt, prime: BigInt) -> FieldElement {
+    pub fn new(num: BigInt, prime: BigInt) -> FieldElement {
         FieldElement {
             num,
             prime,
         }
     }
 
-    fn eq(&self, elem: FieldElement) -> bool {
+    pub fn eq(&self, elem: FieldElement) -> bool {
         self.num == elem.num && self.prime == elem.prime
     }
 
-    fn pow(&self, exp: &BigInt) -> FieldElement {
+    pub fn pow(&self, exp: &BigInt) -> FieldElement {
         let positive_exponent = exp.rem_euclid(self.prime.clone() - 1);
         let num = self.num.modpow(&positive_exponent, &self.prime);
 
