@@ -45,7 +45,7 @@ impl<const A: i64, const B: i64> Add<Point<A, B>> for Point<A, B> {
                 if x1 == x2 {
                     if y1 == y2 {
                         // Case when P1 == P2
-                        
+
                         // When tanget line is vertical
                         if y1 == 0.to_bigint().unwrap() {
                             return Point::new_infinity()

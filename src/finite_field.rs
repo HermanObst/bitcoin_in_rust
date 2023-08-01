@@ -1,6 +1,7 @@
 // Create struct for a finite field element.
 use num_bigint::BigInt;
 use num_bigint::ToBigInt;
+use std::ops::{Add, Div, Mul, Sub};
 
 
 #[derive(Debug, PartialEq, Eq)]
@@ -18,32 +19,8 @@ impl FieldElement {
         }
     }
 
-    fn eq(&self, elem: Option<FieldElement>) -> bool {
-        match elem {
-            Some(field_elem) => self.num == field_elem.num && self.prime == field_elem.prime,
-            None => false,
-        }
-    }
-
-    fn add(&self, elem: &FieldElement) -> FieldElement {
-        assert!(self.prime == elem.prime, "Cannot add two numbers in different fields");
-        let num = (self.num.clone() + elem.num.clone()).rem_euclid(self.prime.clone());
-
-        FieldElement::new(num, self.prime.clone())
-    }
-
-    fn sub(&self, elem: &FieldElement) -> FieldElement {
-        assert!(self.prime == elem.prime, "Cannot subtract two numbers in different fields");
-        let num = (self.num.clone() - elem.num.clone()).rem_euclid(self.prime.clone());
-
-        FieldElement::new(num, self.prime.clone())
-    }
-
-    fn mul(&self, elem: &FieldElement) -> FieldElement {
-        assert!(self.prime == elem.prime, "Cannot multiply two numbers in different fields");
-        let num = (self.num.clone() * &elem.num).rem_euclid(self.prime.clone());
-
-        FieldElement::new(num, self.prime.clone())
+    fn eq(&self, elem: FieldElement) -> bool {
+        self.num == elem.num && self.prime == elem.prime
     }
 
     fn pow(&self, exp: &BigInt) -> FieldElement {
@@ -52,8 +29,45 @@ impl FieldElement {
 
         FieldElement::new(num, self.prime.clone())
     }
+}
 
-    fn truediv(&self, elem: &FieldElement) -> FieldElement {
+impl Add<FieldElement> for FieldElement {
+    type Output = Self;
+
+    fn add(self, elem: FieldElement) -> FieldElement {
+        assert!(self.prime == elem.prime, "Cannot add two numbers in different fields");
+        let num = (self.num + elem.num).rem_euclid(self.prime.clone());
+
+        FieldElement::new(num, self.prime.clone())
+    }
+}
+
+impl Sub<FieldElement> for FieldElement {
+    type Output = Self;
+
+    fn sub(self, elem: FieldElement) -> FieldElement {
+        assert!(self.prime == elem.prime, "Cannot subtract two numbers in different fields");
+        let num = (self.num - elem.num).rem_euclid(self.prime.clone());
+
+        FieldElement::new(num, self.prime.clone())
+    }
+}
+
+impl Mul<FieldElement> for FieldElement {
+    type Output = Self;
+
+    fn mul(self, elem: FieldElement) -> FieldElement {
+        assert!(self.prime == elem.prime, "Cannot multiply two numbers in different fields");
+        let num = (self.num * elem.num).rem_euclid(self.prime.clone());
+
+        FieldElement::new(num, self.prime.clone())
+    }
+}
+
+impl Div<FieldElement> for FieldElement {
+    type Output = Self;
+
+    fn div(self, elem: FieldElement) -> FieldElement {
         assert!(self.prime == elem.prime, "Cannot divide two numbers in different fields");
         let factor = elem.num.modpow(&(self.prime.clone() - 2_i32.to_bigint().unwrap()), &self.prime);
         let num = (self.num.clone() * factor) % self.prime.clone();
@@ -99,17 +113,19 @@ mod test {
         let field_element3 = FieldElement::new(num2.to_bigint().unwrap(), prime1.to_bigint().unwrap());
         let field_element4 = FieldElement::new(num1.to_bigint().unwrap(), prime2.to_bigint().unwrap());
 
-        assert_eq!(field_element1.eq(Some(field_element2)), true);
-        assert_eq!(field_element1.eq(Some(field_element3)), false);
-        assert_eq!(field_element1.eq(Some(field_element4)), false);
-        assert_eq!(field_element1.eq(None), false);
+        assert!(field_element1 == field_element2);
+        assert!(field_element1 != field_element3);
+        assert_eq!(field_element1.eq(field_element2), true);
+        assert_eq!(field_element1.eq(field_element3), false);
+        assert_eq!(field_element1.eq(field_element4), false);
     }
 
     #[test]
     fn add_field_elements() {
         let field_element1 = FieldElement::new(7.to_bigint().unwrap(), 13.to_bigint().unwrap());
         let field_element2 = FieldElement::new(12.to_bigint().unwrap(), 13.to_bigint().unwrap());
-        let result = field_element1.add(&field_element2);
+        // let result = field_element1.add(&field_element2);
+        let result = field_element1 + field_element2;
 
         assert_eq!(result.num, 6.to_bigint().unwrap());
         assert_eq!(result.prime, 13.to_bigint().unwrap());
@@ -119,7 +135,7 @@ mod test {
     fn sub_field_elements() {
         let field_element1 = FieldElement::new(7.to_bigint().unwrap(), 13.to_bigint().unwrap());
         let field_element2 = FieldElement::new(12.to_bigint().unwrap(), 13.to_bigint().unwrap());
-        let result = field_element1.sub(&field_element2);
+        let result = field_element1 - field_element2;
 
         assert_eq!(result.num, 8.to_bigint().unwrap());
         assert_eq!(result.prime, 13.to_bigint().unwrap());
@@ -129,7 +145,7 @@ mod test {
     fn mul_field_elements() {
         let field_element1 = FieldElement::new(3.to_bigint().unwrap(), 13.to_bigint().unwrap());
         let field_element2 = FieldElement::new(12.to_bigint().unwrap(), 13.to_bigint().unwrap());
-        let result = field_element1.mul(&field_element2);
+        let result = field_element1 * field_element2;
 
         assert_eq!(result.num, 10.to_bigint().unwrap());
         assert_eq!(result.prime, 13.to_bigint().unwrap());
@@ -146,12 +162,13 @@ mod test {
     }
 
     #[test]
-    fn truediv_field_elements() {
+    fn div_field_elements() {
         let field_element1 = FieldElement::new(3.to_bigint().unwrap(), 31.to_bigint().unwrap());
+        let felt1_prime = field_element1.prime.clone();
         let field_element2 = FieldElement::new(24.to_bigint().unwrap(), 31.to_bigint().unwrap());
-        let result = field_element1.truediv(&field_element2);
+        let result = field_element1 / field_element2;
 
         assert_eq!(result.num, 4.to_bigint().unwrap());
-        assert_eq!(result.prime, field_element1.prime.clone());
+        assert_eq!(result.prime, felt1_prime);
     }
 }
