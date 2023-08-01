@@ -45,12 +45,13 @@ impl<const A: i64, const B: i64> Add<Point<A, B>> for Point<A, B> {
                 if x1 == x2 {
                     if y1 == y2 {
                         // Case when P1 == P2
-                        let slope: BigInt = (3*&x1.pow(2) + A)/2*&y1;
+                        
                         // When tanget line is vertical
                         if y1 == 0.to_bigint().unwrap() {
                             return Point::new_infinity()
                         }
                         
+                        let slope: BigInt = (3*&x1.pow(2) + A)/2*&y1;
                         let x3 = slope.pow(2) - 2*&x1;
                         let y3 = slope*(&x1 - &x3) - y1;
                         // This unwrap cannot fail as this functions already recives two valid points.
@@ -141,6 +142,16 @@ mod point_tests {
 
         assert!(point1 == point2);
         assert_eq!(point1 + point2, Point::<0,0>::new_infinity());
+    }
+
+    #[test]
+    fn test_add_same_point() {
+        // p(-1,-1) + p(-1,-1) = p(18,77)
+        let point1 = Point::<5,7>::new_point(-1.to_bigint().unwrap(),-1.to_bigint().unwrap()).unwrap(); 
+        let point2 = Point::<5,7>::new_point(-1.to_bigint().unwrap(),-1.to_bigint().unwrap()).unwrap();
+
+        assert!(point1 == point2);
+        assert_eq!(point1 + point2, Point::<5,7>::new_point(18.to_bigint().unwrap(), 77.to_bigint().unwrap()).unwrap());
     }
 
     #[test]
