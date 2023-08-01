@@ -46,11 +46,11 @@ impl<const A: i64, const B: i64> Add<Point<A, B>> for Point<A, B> {
                     if y1 == y2 {
                         // Case when P1 == P2
                         let slope: BigInt = (3*&x1.pow(2) + A)/2*&y1;
-
                         // When tanget line is vertical
-                        if slope == 0.to_bigint().unwrap() {
+                        if y1 == 0.to_bigint().unwrap() {
                             return Point::new_infinity()
                         }
+                        
                         let x3 = slope.pow(2) - 2*&x1;
                         let y3 = slope*(&x1 - &x3) - y1;
                         // This unwrap cannot fail as this functions already recives two valid points.
@@ -61,7 +61,7 @@ impl<const A: i64, const B: i64> Add<Point<A, B>> for Point<A, B> {
                     }
                 } else {
                     // Case were x coordinates are differents
-                    let slope = (&y1 - &y2)/(&x2 - &x1);
+                    let slope = (&y2 - &y1)/(&x2 - &x1);
                     let x3 = slope.pow(2) - &x1 - &x2;
                     let y3 = slope*(&x1 - &x3) - &y1;
                     // This unwrap cannot fail as this functions already recives two valid points.
@@ -122,5 +122,34 @@ mod point_tests {
         let point = Point::<5,7>::new_point(-1.to_bigint().unwrap(),-1.to_bigint().unwrap()).unwrap();
 
         assert_eq!(point + infinity, Point::<5,7>::new_point(-1.to_bigint().unwrap(),-1.to_bigint().unwrap()).unwrap());
+    }
+
+    #[test]
+    fn test_add_vertical_line() {
+        // This happen when points have same x and different y coordinates
+        let point1 = Point::<5,7>::new_point(-1.to_bigint().unwrap(),1.to_bigint().unwrap()).unwrap(); 
+        let point2 = Point::<5,7>::new_point(-1.to_bigint().unwrap(),-1.to_bigint().unwrap()).unwrap();
+
+        assert_eq!(point1 + point2, Point::<5,7>::new_infinity());
+    }
+
+    #[test]
+    fn test_add_same_point_with_vertical_slope() {
+        // This happen when points are the same and have y == 0
+        let point1 = Point::<0,0>::new_point(0.to_bigint().unwrap(),0.to_bigint().unwrap()).unwrap(); 
+        let point2 = Point::<0,0>::new_point(0.to_bigint().unwrap(),0.to_bigint().unwrap()).unwrap();
+
+        assert!(point1 == point2);
+        assert_eq!(point1 + point2, Point::<0,0>::new_infinity());
+    }
+
+    #[test]
+    fn test_add_points_with_different_x() {
+        // p(2,5) + p(-1,-1) = p(3,-7)
+        let point1 = Point::<5,7>::new_point(2.to_bigint().unwrap(),5.to_bigint().unwrap()).unwrap(); 
+        let point2 = Point::<5,7>::new_point(-1.to_bigint().unwrap(),-1.to_bigint().unwrap()).unwrap();
+
+        assert!(point1 != point2);
+        assert_eq!(point1 + point2, Point::<5,7>::new_point(3.to_bigint().unwrap(), -7.to_bigint().unwrap()).unwrap());
     }
 }
