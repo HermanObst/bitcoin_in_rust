@@ -6,8 +6,8 @@ use std::ops::{Add, Div, Mul, Sub};
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub(crate) struct FieldElement {
-    num: BigInt,
-    prime: BigInt,
+    pub(crate) num: BigInt,
+    pub(crate) prime: BigInt,
 }
 
 #[allow(dead_code)]
