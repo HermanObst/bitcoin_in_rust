@@ -38,7 +38,7 @@ impl Add<FieldElement> for FieldElement {
         assert!(self.prime == elem.prime, "Cannot add two numbers in different fields");
         let num = (self.num + elem.num).rem_euclid(self.prime.clone());
 
-        FieldElement::new(num, self.prime.clone())
+        FieldElement::new(num, self.prime)
     }
 }
 
@@ -49,7 +49,7 @@ impl Sub<FieldElement> for FieldElement {
         assert!(self.prime == elem.prime, "Cannot subtract two numbers in different fields");
         let num = (self.num - elem.num).rem_euclid(self.prime.clone());
 
-        FieldElement::new(num, self.prime.clone())
+        FieldElement::new(num, self.prime)
     }
 }
 
@@ -60,7 +60,7 @@ impl Mul<FieldElement> for FieldElement {
         assert!(self.prime == elem.prime, "Cannot multiply two numbers in different fields");
         let num = (self.num * elem.num).rem_euclid(self.prime.clone());
 
-        FieldElement::new(num, self.prime.clone())
+        FieldElement::new(num, self.prime)
     }
 }
 
@@ -72,7 +72,7 @@ impl Div<FieldElement> for FieldElement {
         let factor = elem.num.modpow(&(self.prime.clone() - 2_i32.to_bigint().unwrap()), &self.prime);
         let num = (self.num.clone() * factor) % self.prime.clone();
 
-        FieldElement::new(num, self.prime.clone())
+        FieldElement::new(num, self.prime)
     }
 }
 

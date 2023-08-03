@@ -47,9 +47,7 @@ impl Add<Point> for Point {
     type Output = Self;
 
     fn add(self, other: Point) -> Self {
-        if self.elliptic_curve != other.elliptic_curve {
-            panic!("{}", Errors::DifferentCurves);
-        }
+        assert!(!(self.elliptic_curve != other.elliptic_curve), "{}", Errors::DifferentCurves);
 
         let a = self.elliptic_curve.a.clone();
         let b = self.elliptic_curve.b.clone();
@@ -67,7 +65,7 @@ impl Add<Point> for Point {
                         }
                         
                         let slope = (FieldElement::new(BigInt::from(3), prime.clone()) * x1.pow(&BigInt::from(2)) + a.clone()) / (FieldElement::new(BigInt::from(2), prime.clone()) * y1.clone());
-                        let x3 = slope.pow(&BigInt::from(2)) - FieldElement::new(BigInt::from(2), prime.clone())*x1.clone();
+                        let x3 = slope.pow(&BigInt::from(2)) - FieldElement::new(BigInt::from(2), prime)*x1.clone();
                         let y3 = slope*(x1 - x3.clone()) - y1;
 
                         // This unwrap cannot fail as this functions already recives two valid points.
