@@ -59,16 +59,17 @@ impl Add<Point> for Point {
             (PointValue::Point(x1,y1), PointValue::Point(x2,y2)) => {
                 if x1 == x2 {
                     if y1 == y2 {
-                        // Case when P1 == P2
+                        // Case P1 == P2
 
-                        // When tanget line is vertical
+                        // tanget line is vertical
                         if y1.num == 0.to_bigint().unwrap() {
                             return Point::new_infinity(a, b)
                         }
                         
-                        let slope = (FieldElement::new(BigInt::from(3), prime.clone()) * x1.pow(&BigInt::from(2)) + a.clone()) / FieldElement::new(BigInt::from(2), prime.clone()) * y1.clone();
+                        let slope = (FieldElement::new(BigInt::from(3), prime.clone()) * x1.pow(&BigInt::from(2)) + a.clone()) / (FieldElement::new(BigInt::from(2), prime.clone()) * y1.clone());
                         let x3 = slope.pow(&BigInt::from(2)) - FieldElement::new(BigInt::from(2), prime.clone())*x1.clone();
                         let y3 = slope*(x1 - x3.clone()) - y1;
+
                         // This unwrap cannot fail as this functions already recives two valid points.
                         Point::new_point(x3, y3, a, b).unwrap()
                     } else {
@@ -122,7 +123,105 @@ mod point_tests {
     }
 
     #[test]
-    fn test_add_ec_field_points() {
-        todo!()
+    fn test_add_ec_field_points_different_x() {
+        let prime = BigInt::from(223);
+        let a = FieldElement::new(BigInt::from(0), prime.clone());
+        let b = FieldElement::new(BigInt::from(7), prime.clone());
+        let x1 = FieldElement::new(BigInt::from(192), prime.clone());
+        let y1 = FieldElement::new(BigInt::from(105), prime.clone());
+        let x2 = FieldElement::new(BigInt::from(17), prime.clone());
+        let y2 = FieldElement::new(BigInt::from(56), prime.clone());
+
+        let p1 = Point::new_point(x1, y1, a.clone(), b.clone()).unwrap();
+        let p2 = Point::new_point(x2, y2, a.clone(), b.clone()).unwrap();
+
+        let xr = FieldElement::new(BigInt::from(170), prime.clone()); 
+        let yr = FieldElement::new(BigInt::from(142), prime.clone()); 
+        let r = Point::new_point(xr, yr, a.clone(), b.clone()).unwrap();
+
+        assert!(p1.clone() + p2.clone() == r);
+    }
+
+    #[test]
+    fn test_add_ec_field_points_inf(){
+        let prime = BigInt::from(223);
+        let a = FieldElement::new(BigInt::from(0), prime.clone());
+        let b = FieldElement::new(BigInt::from(7), prime.clone());
+        let x1 = FieldElement::new(BigInt::from(192), prime.clone());
+        let y1 = FieldElement::new(BigInt::from(105), prime.clone());
+
+        let p1 = Point::new_point(x1, y1, a.clone(), b.clone()).unwrap();
+
+        assert_eq!(p1.clone() + Point::new_infinity(a.clone(), b.clone()), p1);
+    }
+
+    #[test]
+    fn test_add_vertical_line() {
+        // This happen when points have same x and different y coordinates
+        let prime = BigInt::from(223);
+        let a = FieldElement::new(BigInt::from(5), prime.clone());
+        let b = FieldElement::new(BigInt::from(7), prime.clone());
+
+        let one = FieldElement::new(BigInt::from(1), prime.clone());
+        let one_minus = FieldElement::new(BigInt::from(-1), prime.clone());
+
+        let p1 = Point::new_point(one_minus.clone(), one, a.clone(), b.clone()).unwrap(); 
+        let p2 = Point::new_point(one_minus.clone(), one_minus, a.clone(), b.clone()).unwrap();
+
+        assert_eq!(p1 + p2, Point::new_infinity(a,b));
+    }
+
+    #[test]
+    fn test_add_same_point() {
+        let prime = BigInt::from(223);
+        let a = FieldElement::new(BigInt::from(0), prime.clone());
+        let b = FieldElement::new(BigInt::from(7), prime.clone());
+        let x1 = FieldElement::new(BigInt::from(192), prime.clone());
+        let y1 = FieldElement::new(BigInt::from(105), prime.clone()); 
+        let p1 = Point::new_point(x1, y1, a.clone(), b.clone()).unwrap();
+
+
+        let xr = FieldElement::new(BigInt::from(49), prime.clone()); 
+        let yr = FieldElement::new(BigInt::from(71), prime.clone());
+        let r = Point::new_point(xr, yr, a.clone(), b.clone()).unwrap();
+
+        assert_eq!(p1.clone() + p1.clone(), r);
+
+        let x1 = FieldElement::new(BigInt::from(143), prime.clone());
+        let y1 = FieldElement::new(BigInt::from(98), prime.clone()); 
+        let p1 = Point::new_point(x1, y1, a.clone(), b.clone()).unwrap();
+
+        let xr = FieldElement::new(BigInt::from(64), prime.clone()); 
+        let yr = FieldElement::new(BigInt::from(168), prime.clone());
+        let r = Point::new_point(xr, yr, a.clone(), b.clone()).unwrap();
+
+        assert_eq!(p1.clone() + p1.clone(), r);
+
+        let x1 = FieldElement::new(BigInt::from(47), prime.clone());
+        let y1 = FieldElement::new(BigInt::from(71), prime.clone()); 
+        let p1 = Point::new_point(x1, y1, a.clone(), b.clone()).unwrap();
+
+        let xr = FieldElement::new(BigInt::from(36), prime.clone()); 
+        let yr = FieldElement::new(BigInt::from(111), prime.clone());
+        let r = Point::new_point(xr, yr, a.clone(), b.clone()).unwrap(); 
+
+        assert_eq!(p1.clone() + p1.clone(), r);
+
+        let xr = FieldElement::new(BigInt::from(194), prime.clone()); 
+        let yr = FieldElement::new(BigInt::from(51), prime.clone());
+        let r = Point::new_point(xr, yr, a.clone(), b.clone()).unwrap();
+
+        assert_eq!(p1.clone() + p1.clone() + p1.clone() + p1.clone(), r);
+
+        let xr = FieldElement::new(BigInt::from(116), prime.clone()); 
+        let yr = FieldElement::new(BigInt::from(55), prime.clone());
+        let r = Point::new_point(xr, yr, a.clone(), b.clone()).unwrap();
+
+        assert_eq!(p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone(), r);
+
+        let r = Point::new_infinity(a.clone(), b.clone());
+
+        assert_eq!(p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone(), r);
+        assert_eq!(p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone(), p1);
     }
 }
