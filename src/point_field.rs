@@ -51,6 +51,10 @@ impl Add<Point> for Point {
             panic!("{}", Errors::DifferentCurves);
         }
 
+        let a = self.elliptic_curve.a.clone();
+        let b = self.elliptic_curve.b.clone();
+        let prime = self.elliptic_curve.a.prime.clone();
+
         match (self.point.clone(), other.point.clone()) {
             (PointValue::Point(x1,y1), PointValue::Point(x2,y2)) => {
                 if x1 == x2 {
@@ -59,25 +63,25 @@ impl Add<Point> for Point {
 
                         // When tanget line is vertical
                         if y1.num == 0.to_bigint().unwrap() {
-                            return Point::new_infinity(self.elliptic_curve.a, self.elliptic_curve.b)
+                            return Point::new_infinity(a, b)
                         }
                         
-                        let slope = (FieldElement::new(3.to_bigint().unwrap(), self.elliptic_curve.a.prime)*x1.pow(2.to) + self.elliptic_curve.a)/2*&y1;
-                        let x3 = slope.pow(2) - 2*&x1;
-                        let y3 = slope*(&x1 - &x3) - y1;
+                        let slope = (FieldElement::new(BigInt::from(3), prime.clone()) * x1.pow(&BigInt::from(2)) + a.clone()) / FieldElement::new(BigInt::from(2), prime.clone()) * y1.clone();
+                        let x3 = slope.pow(&BigInt::from(2)) - FieldElement::new(BigInt::from(2), prime.clone())*x1.clone();
+                        let y3 = slope*(x1 - x3.clone()) - y1;
                         // This unwrap cannot fail as this functions already recives two valid points.
-                        Point::new_point(x3, y3, self.elliptic_curve.a, self.elliptic_curve.b).unwrap()
+                        Point::new_point(x3, y3, a, b).unwrap()
                     } else {
                         // Vertical line (same x but different y coordinates)
-                        Point::new_infinity(self.elliptic_curve.a, self.elliptic_curve.b)
+                        Point::new_infinity(a, b)
                     }
                 } else {
                     // Case were x coordinates are differents
-                    let slope = (&y2 - &y1)/(&x2 - &x1);
-                    let x3 = slope.pow(2) - &x1 - &x2;
-                    let y3 = slope*(&x1 - &x3) - &y1;
+                    let slope = (y2 - y1.clone())/(x2.clone() - x1.clone());
+                    let x3 = slope.pow(&BigInt::from(2)) - x1.clone() - x2;
+                    let y3 = slope*(x1 - x3.clone()) - y1;
                     // This unwrap cannot fail as this functions already recives two valid points.
-                    Point::new_point(x3, y3, self.elliptic_curve.a, self.elliptic_curve.b).unwrap()
+                    Point::new_point(x3, y3, a, b).unwrap()
                 }
             },
             // Handle identity (Infinity point). In case both are Infinity, returns Infinity (self).
@@ -115,5 +119,10 @@ mod point_tests {
             let y = FieldElement::new(y.clone(), prime.clone());
             assert_eq!(Point::new_point(x, y, a.clone(), b.clone()), Err(Errors::InvalidPoint))
         }
+    }
+
+    #[test]
+    fn test_add_ec_field_points() {
+        todo!()
     }
 }
