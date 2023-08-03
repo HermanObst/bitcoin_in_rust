@@ -1,5 +1,5 @@
-use bitcoin::types::errors::Errors;
-use crate::finite_field::FieldElement;
+use crate::types::errors::Errors;
+use super::finite_field::FieldElement;
 use num_bigint::{BigInt, ToBigInt};
 use core::ops::{Add, Mul};
 
