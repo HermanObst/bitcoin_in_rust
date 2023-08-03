@@ -1,7 +1,7 @@
 use bitcoin::types::errors::Errors;
 use crate::finite_field::FieldElement;
 use num_bigint::{BigInt, ToBigInt};
-use core::ops::Add;
+use core::ops::{Add, Mul};
 
 #[allow(dead_code)]
 #[derive(Clone, Debug, PartialEq)]
@@ -53,6 +53,7 @@ impl Add<Point> for Point {
         let b = self.elliptic_curve.b.clone();
         let prime = self.elliptic_curve.a.prime.clone();
 
+        // TODO: Use Pattern matching for if clauses
         match (self.point.clone(), other.point.clone()) {
             (PointValue::Point(x1,y1), PointValue::Point(x2,y2)) => {
                 if x1 == x2 {
@@ -87,6 +88,26 @@ impl Add<Point> for Point {
             (_, PointValue::Infinity) => self,
             (PointValue::Infinity, _) => other
         }
+    }
+}
+
+impl<T> Mul<T> for Point where T: Into<BigInt> {
+    type Output = Self;
+
+    fn mul(self, coefficient: T) -> Self {
+        let mut coef: BigInt = coefficient.into();
+        let mut current = self.clone();
+        let mut result = Point::new_infinity(self.elliptic_curve.a, self.elliptic_curve.b);
+
+        // Use BigInt::from(0) instead of BigInt::one()
+        while coef != BigInt::from(0) {
+            if coef.clone() & BigInt::from(1) == BigInt::from(1) {
+                result = result + current.clone();
+            }
+            current = current.clone() + current;
+            coef = coef >> 1;
+        }
+        result
     }
 }
 
@@ -221,5 +242,21 @@ mod point_tests {
 
         assert_eq!(p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone(), r);
         assert_eq!(p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone(), p1);
+    }
+
+    #[test]
+    fn test_scalar_mul() {
+        let prime = BigInt::from(223);
+        let a = FieldElement::new(BigInt::from(0), prime.clone());
+        let b = FieldElement::new(BigInt::from(7), prime.clone());
+
+        let x = FieldElement::new(BigInt::from(15), prime.clone());
+        let y = FieldElement::new(BigInt::from(86), prime.clone());
+
+        let p = Point::new_point(x, y, a.clone(), b.clone()).unwrap();
+
+        assert_eq!(p.clone(), p.clone() * 1u64);
+        assert_eq!(p.clone() * 7u64, Point::new_infinity(a, b));
+        assert_eq!(p.clone() * 3, p.clone() + p.clone() + p);
     }
 }
