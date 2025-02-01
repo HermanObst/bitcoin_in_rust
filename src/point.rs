@@ -1,5 +1,6 @@
 use bitcoin::types::errors::Errors;
-use num_bigint::{BigInt, ToBigInt};
+use num_traits::identities::Zero;
+use num_bigint::BigInt;
 use core::ops::Add;
 
 #[allow(dead_code)]
@@ -40,38 +41,41 @@ impl<const A: i64, const B: i64> Add<Point<A, B>> for Point<A, B> {
     type Output = Self;
 
     fn add(self, other: Self) -> Self {
-        match (self.clone(), other.clone()) {
-            (Point::Point(x1,y1), Point::Point(x2,y2)) => {
+        match (self, other) {
+            // If either operand is the identity (point at infinity), return the other.
+            (Point::Infinity, p) => p,
+            (p, Point::Infinity) => p,
+
+            // Both are actual points on the curve.
+            (Point::Point(x1, y1), Point::Point(x2, y2)) => {
                 if x1 == x2 {
                     if y1 == y2 {
-                        // Case when P1 == P2
+                        // ---- Doubling case (P1 == P2) ----
+                        if y1.is_zero() {
+                            // Tangent is vertical if y1 = 0, so result is infinity.
+                            Point::new_infinity()
+                        } else {
+                            // slope = (3*x1^2 + A) / (2*y1)
+                            let numerator  = BigInt::from(3) * x1.pow(2_u32) + BigInt::from(A);
+                            let denominator = BigInt::from(2) * &y1;
+                            let slope = numerator / denominator;
 
-                        // When tanget line is vertical
-                        if y1 == 0.to_bigint().unwrap() {
-                            return Point::new_infinity()
+                            let x3 = slope.pow(2_u32) - (BigInt::from(2) * &x1);
+                            let y3 = &slope * (&x1 - &x3) - &y1;
+                            Point::new_point(x3, y3).unwrap()
                         }
-                        
-                        let slope: BigInt = (3*&x1.pow(2) + A)/2*&y1;
-                        let x3 = slope.pow(2) - 2*&x1;
-                        let y3 = slope*(&x1 - &x3) - y1;
-                        // This unwrap cannot fail as this functions already recives two valid points.
-                        Point::new_point(x3, y3).unwrap()
                     } else {
-                        // Vertical line (same x but different y coordinates)
+                        // ---- P1 = -P2 => vertical line => infinity. ----
                         Point::new_infinity()
                     }
                 } else {
-                    // Case were x coordinates are differents
-                    let slope = (&y2 - &y1)/(&x2 - &x1);
-                    let x3 = slope.pow(2) - &x1 - &x2;
-                    let y3 = slope*(&x1 - &x3) - &y1;
-                    // This unwrap cannot fail as this functions already recives two valid points.
+                    // ---- Addition case (x1 != x2) ----
+                    let slope = (&y2 - &y1) / (&x2 - &x1);
+                    let x3 = slope.pow(2_u32) - &x1 - &x2;
+                    let y3 = &slope * (&x1 - &x3) - &y1;
                     Point::new_point(x3, y3).unwrap()
                 }
-            },
-            // Handle identity (Infinity point). In case both are Infinity, returns Infinity (self).
-            (_, Point::Infinity) => self,
-            (Point::Infinity, _) => other
+            }
         }
     }
 }

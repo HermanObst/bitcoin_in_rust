@@ -1,6 +1,5 @@
 // Create struct for a finite field element.
 use num_bigint::BigInt;
-use num_bigint::ToBigInt;
 use std::ops::{Add, Div, Mul, Sub};
 use num_integer::Integer;
 
@@ -69,6 +68,7 @@ impl Div<FieldElement> for FieldElement {
 
 #[cfg(test)]
 mod test {
+    use num_bigint::ToBigInt;
     use super::*;
 
     #[test]
