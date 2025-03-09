@@ -1,13 +1,13 @@
 // Create struct for a finite field element.
 use num_bigint::BigInt;
-use std::ops::{Add, Div, Mul, Sub};
 use num_integer::Integer;
+use num_traits::Zero;
+use std::ops::{Add, Div, Mul, Sub};
 
-
-#[derive(Debug, PartialEq, Eq)]
-struct FieldElement {
-    num: BigInt,
-    prime: BigInt,
+#[derive(Debug, PartialEq, Eq, Clone)]
+pub(crate) struct FieldElement {
+    pub(crate) num: BigInt,
+    pub(crate) prime: BigInt,
 }
 
 #[allow(dead_code)]
@@ -16,11 +16,26 @@ impl FieldElement {
         FieldElement { num, prime }
     }
 
-    fn pow(self, exp: &BigInt) -> FieldElement {
-        let prime_minus_one = &self.prime - 1; 
+    pub fn pow(&self, exp: &BigInt) -> FieldElement {
+        let prime_minus_one = &self.prime - 1;
         let positive_exponent = exp.mod_floor(&prime_minus_one);
         let num = self.num.modpow(&positive_exponent, &self.prime);
-        FieldElement::new(num, self.prime)
+        FieldElement::new(num, self.prime.clone())
+    }
+
+    pub fn zero(prime: BigInt) -> FieldElement {
+        FieldElement {
+            num: BigInt::zero(),
+            prime,
+        }
+    }
+
+    pub fn is_zero(&self) -> bool {
+        self.num == BigInt::zero()
+    }
+
+    pub fn prime(&self) -> BigInt {
+        self.prime.clone()
     }
 }
 
@@ -28,7 +43,10 @@ impl Add<FieldElement> for FieldElement {
     type Output = Self;
 
     fn add(self, elem: FieldElement) -> FieldElement {
-        assert!(self.prime == elem.prime, "Cannot add two numbers in different fields");
+        assert!(
+            self.prime == elem.prime,
+            "Cannot add two numbers in different fields"
+        );
         let num = (self.num + elem.num).mod_floor(&self.prime);
         FieldElement::new(num, self.prime)
     }
@@ -38,7 +56,10 @@ impl Sub<FieldElement> for FieldElement {
     type Output = Self;
 
     fn sub(self, elem: FieldElement) -> FieldElement {
-        assert!(self.prime == elem.prime, "Cannot subtract two numbers in different fields");
+        assert!(
+            self.prime == elem.prime,
+            "Cannot subtract two numbers in different fields"
+        );
         let num = (self.num - elem.num).mod_floor(&self.prime);
         FieldElement::new(num, self.prime)
     }
@@ -48,7 +69,10 @@ impl Mul<FieldElement> for FieldElement {
     type Output = Self;
 
     fn mul(self, elem: FieldElement) -> FieldElement {
-        assert!(self.prime == elem.prime, "Cannot multiply two numbers in different fields");
+        assert!(
+            self.prime == elem.prime,
+            "Cannot multiply two numbers in different fields"
+        );
         let num = (self.num * elem.num).mod_floor(&self.prime);
         FieldElement::new(num, self.prime)
     }
@@ -58,18 +82,20 @@ impl Div<FieldElement> for FieldElement {
     type Output = Self;
 
     fn div(self, elem: FieldElement) -> FieldElement {
-        assert!(self.prime == elem.prime, "Cannot divide two numbers in different fields");
+        assert!(
+            self.prime == elem.prime,
+            "Cannot divide two numbers in different fields"
+        );
         let factor = elem.num.modpow(&(&self.prime - 2_i32), &self.prime);
         let num = (self.num * factor) % &self.prime;
         FieldElement::new(num, self.prime)
     }
 }
 
-
 #[cfg(test)]
 mod test {
-    use num_bigint::ToBigInt;
     use super::*;
+    use num_bigint::ToBigInt;
 
     #[test]
     fn create_field_element() {
@@ -89,10 +115,14 @@ mod test {
         let prime1 = 7;
         let prime2 = 11;
 
-        let field_element1 = FieldElement::new(num1.to_bigint().unwrap(), prime1.to_bigint().unwrap());
-        let field_element2 = FieldElement::new(num1.to_bigint().unwrap(), prime1.to_bigint().unwrap());
-        let field_element3 = FieldElement::new(num2.to_bigint().unwrap(), prime1.to_bigint().unwrap());
-        let field_element4 = FieldElement::new(num1.to_bigint().unwrap(), prime2.to_bigint().unwrap());
+        let field_element1 =
+            FieldElement::new(num1.to_bigint().unwrap(), prime1.to_bigint().unwrap());
+        let field_element2 =
+            FieldElement::new(num1.to_bigint().unwrap(), prime1.to_bigint().unwrap());
+        let field_element3 =
+            FieldElement::new(num2.to_bigint().unwrap(), prime1.to_bigint().unwrap());
+        let field_element4 =
+            FieldElement::new(num1.to_bigint().unwrap(), prime2.to_bigint().unwrap());
 
         assert_eq!(field_element1, field_element2);
         assert_ne!(field_element1, field_element3);
