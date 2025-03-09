@@ -1,4 +1,4 @@
-## Bitcoin Implementation in Rust
+## Bitcoin in Rust
 
 This repository, `bitcoin_implementation_in_rust`, is an endeavor to implement Bitcoin concepts and functionalities using the Rust programming language. It's inspired by the book "Programming Bitcoin" by Jimmy Song, available [here](https://www.oreilly.com/library/view/programming-bitcoin/9781492031482/). The book is a comprehensive guide to understanding the principles behind Bitcoin and provides a solid foundation for coding Bitcoin applications. This project aims to translate these principles into Rust, a language known for its performance and safety.
 
