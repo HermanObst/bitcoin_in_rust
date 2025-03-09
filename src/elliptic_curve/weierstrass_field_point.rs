@@ -3,7 +3,7 @@ use std::ops::Add;
 use crate::types::errors::Errors;
 use crate::elliptic_curve::{traits::{EllipticCurve, Point, Coords}, finite_field::FieldElement};
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 struct WeierstrassCurve {
     a: FieldElement,
     b: FieldElement,
@@ -52,8 +52,19 @@ impl<'a> PartialEq for Point<'a, WeierstrassCurve> {
 impl<'a> Add for Point<'a, WeierstrassCurve> {
     type Output = Self;
 
-    fn add(self, _other: Self) -> Self {
+    fn add(self, other: Self) -> Self::Output {
+        let curve = self.curve; // Ensure curve is accessible
+        let curve_other = other.curve;
+        if curve != curve_other {
+            // TODO: Handle this case gracefully
+            panic!("Cannot add points on different curves");
+        }       
+        // match (&self.coords, &other.coords) {
+        //     // If either operand is the identity (point at infinity), return the other.
+        //     (Coords::Infinity, _) => other,
+        //     (_, Coords::Infinity) => self,
+        //     todo!()
+        // }
         todo!()
     }
 }
-
