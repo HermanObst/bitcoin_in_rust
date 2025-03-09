@@ -11,7 +11,7 @@
 // Implementing this trait for a field allows the use of elliptic curve operations
 // such as point addition, doubling, and scalar multiplication.
 
-pub(crate) trait EllipticCurve where Self::Field: std::fmt::Debug {
+pub(crate) trait EllipticCurve where Self::Field: std::fmt::Debug + Clone {
     type Field;
 
     fn a(&self) -> Self::Field;
@@ -20,13 +20,13 @@ pub(crate) trait EllipticCurve where Self::Field: std::fmt::Debug {
     fn defining_equation(&self, x: &Self::Field, y: &Self::Field) -> Self::Field;
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub(crate) struct Point<'a, E: EllipticCurve> {
     pub(crate) coords: Coords<E>,
     pub(crate) curve: &'a E,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub(crate) enum Coords<E: EllipticCurve> {
     Point(E::Field, E::Field),
     Infinity,

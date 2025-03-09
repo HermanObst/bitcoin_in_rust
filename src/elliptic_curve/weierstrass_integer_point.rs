@@ -98,7 +98,7 @@ impl<'a> Add for Point<'a, RealWeierstrassCurve> {
                     if y1 == y2 {
                         // ---- Doubling case (P1 == P2) ----
                         if y1.is_zero() {
-                            // Tangent is vertical if y1 = 0, so result is infinity.
+                            // Tangent line to the curve is vertical if y = 0, which results in infinity
                             Point::new_infinity(curve)
                         } else {
                             // slope = (3*x1^2 + A) / (2*y1)

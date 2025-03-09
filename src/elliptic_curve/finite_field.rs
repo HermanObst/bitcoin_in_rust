@@ -17,16 +17,20 @@ impl FieldElement {
         FieldElement { num, prime }
     }
 
-    pub fn pow(self, exp: &BigInt) -> FieldElement {
+    pub fn pow(&self, exp: &BigInt) -> FieldElement {
         let prime_minus_one = &self.prime - 1; 
         let positive_exponent = exp.mod_floor(&prime_minus_one);
         let num = self.num.modpow(&positive_exponent, &self.prime);
-        FieldElement::new(num, self.prime)
+        FieldElement::new(num, self.prime.clone())
     }
 
     pub fn zero(prime: BigInt) -> FieldElement {
         FieldElement { num: BigInt::zero(), prime }
     }
+
+    pub fn is_zero(&self) -> bool {
+        self.num == BigInt::zero()
+    } 
 
     pub fn prime(&self) -> BigInt {
         self.prime.clone()
