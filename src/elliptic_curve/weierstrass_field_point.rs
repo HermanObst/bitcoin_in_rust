@@ -1,4 +1,4 @@
-use std::ops::{Add,Mul};
+use std::ops::{Add, Mul};
 
 use num_bigint::BigInt;
 use num_traits::Zero;
@@ -124,7 +124,10 @@ impl Add for Point<'_, WeierstrassCurve> {
     }
 }
 
-impl<T> Mul<T> for Point<'_, WeierstrassCurve> where T: Into<BigInt> {
+impl<T> Mul<T> for Point<'_, WeierstrassCurve>
+where
+    T: Into<BigInt>,
+{
     type Output = Self;
 
     fn mul(self, coefficient: T) -> Self {
@@ -136,7 +139,7 @@ impl<T> Mul<T> for Point<'_, WeierstrassCurve> where T: Into<BigInt> {
             if coeff.clone() & BigInt::from(1) != BigInt::zero() {
                 result = result + current.clone();
             }
-            coeff = coeff >> 1;
+            coeff >>= 1;
             current = current.clone() + current;
         }
         result
@@ -399,7 +402,10 @@ mod weierstrass_field_point_tests {
         let prime = BigInt::from(223);
         let a = FieldElement::new(BigInt::from(0), prime.clone());
         let b = FieldElement::new(BigInt::from(7), prime.clone());
-        let curve = WeierstrassCurve { a: a.clone(), b: b.clone() };
+        let curve = WeierstrassCurve {
+            a: a.clone(),
+            b: b.clone(),
+        };
 
         let x = FieldElement::new(BigInt::from(15), prime.clone());
         let y = FieldElement::new(BigInt::from(86), prime.clone());
@@ -416,7 +422,10 @@ mod weierstrass_field_point_tests {
         let prime = BigInt::from(223);
         let a = FieldElement::new(BigInt::from(0), prime.clone());
         let b = FieldElement::new(BigInt::from(7), prime.clone());
-        let curve = WeierstrassCurve { a: a.clone(), b: b.clone() };
+        let curve = WeierstrassCurve {
+            a: a.clone(),
+            b: b.clone(),
+        };
 
         let x = FieldElement::new(BigInt::from(47), prime.clone());
         let y = FieldElement::new(BigInt::from(71), prime.clone());
@@ -424,10 +433,26 @@ mod weierstrass_field_point_tests {
         let p = Point::new_point(&curve, &x, &y).unwrap();
 
         let expected_results = [
-            (47, 71), (36, 111), (15, 137), (194, 51), (126, 96),
-            (139, 137), (92, 47), (116, 55), (69, 86), (154, 150),
-            (154, 73), (69, 137), (116, 168), (92, 176), (139, 86),
-            (126, 127), (194, 172), (15, 86), (36, 112), (47, 152)
+            (47, 71),
+            (36, 111),
+            (15, 137),
+            (194, 51),
+            (126, 96),
+            (139, 137),
+            (92, 47),
+            (116, 55),
+            (69, 86),
+            (154, 150),
+            (154, 73),
+            (69, 137),
+            (116, 168),
+            (92, 176),
+            (139, 86),
+            (126, 127),
+            (194, 172),
+            (15, 86),
+            (36, 112),
+            (47, 152),
         ];
 
         for (s, &(expected_x, expected_y)) in (1..=20).zip(expected_results.iter()) {
