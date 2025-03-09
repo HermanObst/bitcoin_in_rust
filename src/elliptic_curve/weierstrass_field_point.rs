@@ -1,4 +1,7 @@
-use std::ops::Add;
+use std::ops::{Add,Mul};
+
+use num_bigint::BigInt;
+use num_traits::Zero;
 
 use crate::elliptic_curve::{
     finite_field::FieldElement,
@@ -118,6 +121,25 @@ impl Add for Point<'_, WeierstrassCurve> {
                 }
             }
         }
+    }
+}
+
+impl<T> Mul<T> for Point<'_, WeierstrassCurve> where T: Into<BigInt> {
+    type Output = Self;
+
+    fn mul(self, coefficient: T) -> Self {
+        let mut coeff = coefficient.into();
+        let mut current = self.clone();
+        let mut result = Point::new_infinity(self.curve);
+
+        while coeff != BigInt::zero() {
+            if coeff.clone() & BigInt::from(1) != BigInt::zero() {
+                result = result + current.clone();
+            }
+            coeff = coeff >> 1;
+            current = current.clone() + current;
+        }
+        result
     }
 }
 
@@ -370,5 +392,60 @@ mod weierstrass_field_point_tests {
                 + p1.clone(),
             p1
         );
+    }
+
+    #[test]
+    fn test_scalar_mul() {
+        let prime = BigInt::from(223);
+        let a = FieldElement::new(BigInt::from(0), prime.clone());
+        let b = FieldElement::new(BigInt::from(7), prime.clone());
+        let curve = WeierstrassCurve { a: a.clone(), b: b.clone() };
+
+        let x = FieldElement::new(BigInt::from(15), prime.clone());
+        let y = FieldElement::new(BigInt::from(86), prime.clone());
+
+        let p = Point::new_point(&curve, &x, &y).unwrap();
+
+        assert_eq!(p.clone(), p.clone() * 1u64);
+        assert_eq!(p.clone() * 7u64, Point::new_infinity(&curve));
+        assert_eq!(p.clone() * 3u64, p.clone() + p.clone() + p);
+    }
+
+    #[test]
+    fn test_scalar_multiplication_sequence() {
+        let prime = BigInt::from(223);
+        let a = FieldElement::new(BigInt::from(0), prime.clone());
+        let b = FieldElement::new(BigInt::from(7), prime.clone());
+        let curve = WeierstrassCurve { a: a.clone(), b: b.clone() };
+
+        let x = FieldElement::new(BigInt::from(47), prime.clone());
+        let y = FieldElement::new(BigInt::from(71), prime.clone());
+
+        let p = Point::new_point(&curve, &x, &y).unwrap();
+
+        let expected_results = [
+            (47, 71), (36, 111), (15, 137), (194, 51), (126, 96),
+            (139, 137), (92, 47), (116, 55), (69, 86), (154, 150),
+            (154, 73), (69, 137), (116, 168), (92, 176), (139, 86),
+            (126, 127), (194, 172), (15, 86), (36, 112), (47, 152)
+        ];
+
+        for (s, &(expected_x, expected_y)) in (1..=20).zip(expected_results.iter()) {
+            let result = p.clone() * s;
+            if let Coords::Point(rx, ry) = result.coords {
+                assert_eq!(rx.num, BigInt::from(expected_x));
+                assert_eq!(ry.num, BigInt::from(expected_y));
+            } else {
+                panic!("Result is not a point");
+            }
+        }
+
+        // Test for multiplying by 21, expecting the point at infinity
+        let result = p.clone() * 21;
+        assert_eq!(result, Point::new_infinity(&curve));
+
+        // Group "starts again"
+        let result = p.clone() * 22;
+        assert_eq!(result, p);
     }
 }
