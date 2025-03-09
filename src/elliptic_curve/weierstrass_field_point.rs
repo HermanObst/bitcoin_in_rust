@@ -1,7 +1,10 @@
 use std::ops::Add;
 
+use crate::elliptic_curve::{
+    finite_field::FieldElement,
+    traits::{Coords, EllipticCurve, Point},
+};
 use crate::types::errors::Errors;
-use crate::elliptic_curve::{traits::{EllipticCurve, Point, Coords}, finite_field::FieldElement};
 
 #[derive(Debug, PartialEq, Clone)]
 struct WeierstrassCurve {
@@ -18,7 +21,7 @@ impl EllipticCurve for WeierstrassCurve {
 
     fn b(&self) -> Self::Field {
         self.b.clone()
-    }       
+    }
     fn defining_equation(&self, x: &Self::Field, y: &Self::Field) -> Self::Field {
         y.clone().pow(&2.into()) - x.clone().pow(&3.into()) - self.a() * x.clone() - self.b()
     }
@@ -26,18 +29,28 @@ impl EllipticCurve for WeierstrassCurve {
 
 #[allow(dead_code)]
 impl<'a> Point<'a, WeierstrassCurve> {
-    fn new_point(curve: &'a WeierstrassCurve, x: &FieldElement, y: &FieldElement) -> Result<Self, Errors> {
+    fn new_point(
+        curve: &'a WeierstrassCurve,
+        x: &FieldElement,
+        y: &FieldElement,
+    ) -> Result<Self, Errors> {
         if curve.defining_equation(x, y) != FieldElement::zero(x.prime()) {
             return Err(Errors::InvalidPoint);
         }
 
-        Ok(Point { coords: Coords::Point(x.clone(), y.clone()), curve })
+        Ok(Point {
+            coords: Coords::Point(x.clone(), y.clone()),
+            curve,
+        })
     }
 
     fn new_infinity(curve: &'a WeierstrassCurve) -> Self {
-        Point { coords: Coords::Infinity, curve }
+        Point {
+            coords: Coords::Infinity,
+            curve,
+        }
     }
-}   
+}
 
 impl<'a> PartialEq for Point<'a, WeierstrassCurve> {
     fn eq(&self, other: &Self) -> bool {
@@ -47,7 +60,7 @@ impl<'a> PartialEq for Point<'a, WeierstrassCurve> {
             _ => false,
         }
     }
-}   
+}
 
 // TODO: this needs to create new BigInts instances for every sum, although they are fixed
 // We could define them outside as constants and use referecnes to them
@@ -62,7 +75,7 @@ impl<'a> Add for Point<'a, WeierstrassCurve> {
         if curve != curve_other {
             // TODO: Handle this case gracefully
             panic!("Cannot add points on different curves");
-        }       
+        }
 
         match (&self.coords, &other.coords) {
             // If either operand is the identity (point at infinity), return the other.
@@ -78,12 +91,16 @@ impl<'a> Add for Point<'a, WeierstrassCurve> {
                             Point::new_infinity(curve)
                         } else {
                             // slope = (3*x1^2 + A) / (2*y1)
-                            let numerator = FieldElement::new(3.into(), curve.a().prime()) * x1.pow(&2.into()) + curve.a();
-                            let denominator = FieldElement::new(2.into(), curve.a().prime()) * y1.clone(); 
+                            let numerator = FieldElement::new(3.into(), curve.a().prime())
+                                * x1.pow(&2.into())
+                                + curve.a();
+                            let denominator =
+                                FieldElement::new(2.into(), curve.a().prime()) * y1.clone();
                             let slope = numerator / denominator;
                             // x3 = slope^2 - 2x1
                             // y3 = slope(x1 - x3) - y1
-                            let x3 = slope.pow(&2.into()) - FieldElement::new(2.into(), curve.a().prime()) * x1.clone();
+                            let x3 = slope.pow(&2.into())
+                                - FieldElement::new(2.into(), curve.a().prime()) * x1.clone();
                             let y3 = slope * (x1.clone() - x3.clone()) - y1.clone();
                             Point::new_point(curve, &x3, &y3).unwrap()
                         }
@@ -95,7 +112,7 @@ impl<'a> Add for Point<'a, WeierstrassCurve> {
                     // ---- Addition case (x1 != x2) ----
                     let slope = (y2.clone() - y1.clone()) / (x2.clone() - x1.clone());
                     let x3 = slope.pow(&2.into()) - x1.clone() - x2.clone();
-                    let y3 = slope * (x1.clone() - x3.clone()) - y1.clone(); 
+                    let y3 = slope * (x1.clone() - x3.clone()) - y1.clone();
                     Point::new_point(curve, &x3, &y3).unwrap()
                 }
             }
@@ -105,25 +122,28 @@ impl<'a> Add for Point<'a, WeierstrassCurve> {
 
 #[cfg(test)]
 mod weierstrass_field_point_tests {
-    use num_bigint::ToBigInt;
-    use num_bigint::BigInt;
     use super::*;
+    use num_bigint::BigInt;
+    use num_bigint::ToBigInt;
 
     #[test]
     fn test_create_ec_field_valid_point() {
         let prime = 223.to_bigint().unwrap();
         let a = FieldElement::new(0.to_bigint().unwrap(), prime.clone());
         let b = FieldElement::new(7.to_bigint().unwrap(), prime.clone());
-        let curve = WeierstrassCurve { a: a.clone(), b: b.clone() };
+        let curve = WeierstrassCurve {
+            a: a.clone(),
+            b: b.clone(),
+        };
 
         let valid_points: [(BigInt, BigInt); 3] = [
             (192.to_bigint().unwrap(), 105.to_bigint().unwrap()),
             (17.to_bigint().unwrap(), 56.to_bigint().unwrap()),
-            (1.to_bigint().unwrap(), 193.to_bigint().unwrap())
+            (1.to_bigint().unwrap(), 193.to_bigint().unwrap()),
         ];
         let invalid_points: [(BigInt, BigInt); 2] = [
             (200.to_bigint().unwrap(), 119.to_bigint().unwrap()),
-            (42.to_bigint().unwrap(), 99.to_bigint().unwrap())
+            (42.to_bigint().unwrap(), 99.to_bigint().unwrap()),
         ];
 
         for (x, y) in valid_points.iter() {
@@ -144,7 +164,10 @@ mod weierstrass_field_point_tests {
         let prime = BigInt::from(223);
         let a = FieldElement::new(BigInt::from(0), prime.clone());
         let b = FieldElement::new(BigInt::from(7), prime.clone());
-        let curve = WeierstrassCurve { a: a.clone(), b: b.clone() };
+        let curve = WeierstrassCurve {
+            a: a.clone(),
+            b: b.clone(),
+        };
 
         let x1 = FieldElement::new(BigInt::from(192), prime.clone());
         let y1 = FieldElement::new(BigInt::from(105), prime.clone());
@@ -166,7 +189,10 @@ mod weierstrass_field_point_tests {
         let prime = BigInt::from(223);
         let a = FieldElement::new(BigInt::from(0), prime.clone());
         let b = FieldElement::new(BigInt::from(7), prime.clone());
-        let curve = WeierstrassCurve { a: a.clone(), b: b.clone() };
+        let curve = WeierstrassCurve {
+            a: a.clone(),
+            b: b.clone(),
+        };
 
         let x1 = FieldElement::new(BigInt::from(192), prime.clone());
         let y1 = FieldElement::new(BigInt::from(105), prime.clone());
@@ -182,7 +208,10 @@ mod weierstrass_field_point_tests {
         let prime = BigInt::from(223);
         let a = FieldElement::new(BigInt::from(5), prime.clone());
         let b = FieldElement::new(BigInt::from(7), prime.clone());
-        let curve = WeierstrassCurve { a: a.clone(), b: b.clone() };
+        let curve = WeierstrassCurve {
+            a: a.clone(),
+            b: b.clone(),
+        };
 
         let one = FieldElement::new(BigInt::from(1), prime.clone());
         let one_minus = FieldElement::new(BigInt::from(-1), prime.clone());
@@ -198,7 +227,10 @@ mod weierstrass_field_point_tests {
         let prime = BigInt::from(223);
         let a = FieldElement::new(BigInt::from(0), prime.clone());
         let b = FieldElement::new(BigInt::from(7), prime.clone());
-        let curve = WeierstrassCurve { a: a.clone(), b: b.clone() };
+        let curve = WeierstrassCurve {
+            a: a.clone(),
+            b: b.clone(),
+        };
 
         let x1 = FieldElement::new(BigInt::from(192), prime.clone());
         let y1 = FieldElement::new(BigInt::from(105), prime.clone());
@@ -240,11 +272,68 @@ mod weierstrass_field_point_tests {
         let yr = FieldElement::new(BigInt::from(55), prime.clone());
         let r = Point::new_point(&curve, &xr, &yr).unwrap();
 
-        assert_eq!(p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone(), r);
+        assert_eq!(
+            p1.clone()
+                + p1.clone()
+                + p1.clone()
+                + p1.clone()
+                + p1.clone()
+                + p1.clone()
+                + p1.clone()
+                + p1.clone(),
+            r
+        );
 
         let r = Point::new_infinity(&curve);
 
-        assert_eq!(p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone(), r);
-        assert_eq!(p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone() + p1.clone(), p1);
+        assert_eq!(
+            p1.clone()
+                + p1.clone()
+                + p1.clone()
+                + p1.clone()
+                + p1.clone()
+                + p1.clone()
+                + p1.clone()
+                + p1.clone()
+                + p1.clone()
+                + p1.clone()
+                + p1.clone()
+                + p1.clone()
+                + p1.clone()
+                + p1.clone()
+                + p1.clone()
+                + p1.clone()
+                + p1.clone()
+                + p1.clone()
+                + p1.clone()
+                + p1.clone()
+                + p1.clone(),
+            r
+        );
+        assert_eq!(
+            p1.clone()
+                + p1.clone()
+                + p1.clone()
+                + p1.clone()
+                + p1.clone()
+                + p1.clone()
+                + p1.clone()
+                + p1.clone()
+                + p1.clone()
+                + p1.clone()
+                + p1.clone()
+                + p1.clone()
+                + p1.clone()
+                + p1.clone()
+                + p1.clone()
+                + p1.clone()
+                + p1.clone()
+                + p1.clone()
+                + p1.clone()
+                + p1.clone()
+                + p1.clone()
+                + p1.clone(),
+            p1
+        );
     }
 }

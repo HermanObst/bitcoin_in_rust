@@ -1,8 +1,8 @@
-use core::ops::Add;
+use crate::elliptic_curve::traits::{Coords, EllipticCurve, Point};
 use crate::types::errors::Errors;
-use num_traits::Zero;
+use core::ops::Add;
 use num_bigint::BigInt;
-use crate::elliptic_curve::traits::{EllipticCurve, Point, Coords};
+use num_traits::Zero;
 
 // This module implements the `RealWeierstrassCurve` and associated `Point` operations
 // for elliptic curves defined over the real numbers using the Weierstrass form.
@@ -53,11 +53,17 @@ impl<'a> Point<'a, RealWeierstrassCurve> {
             return Err(Errors::InvalidPoint);
         }
 
-        Ok(Point { coords: Coords::Point(x.clone(), y.clone()), curve })
+        Ok(Point {
+            coords: Coords::Point(x.clone(), y.clone()),
+            curve,
+        })
     }
 
     fn new_infinity(curve: &'a RealWeierstrassCurve) -> Self {
-        Point { coords: Coords::Infinity, curve }
+        Point {
+            coords: Coords::Infinity,
+            curve,
+        }
     }
 }
 
@@ -133,59 +139,134 @@ mod elliptic_curve_tests {
 
     #[test]
     fn test_create_valid_point() {
-        let curve = RealWeierstrassCurve { a: 5.to_bigint().unwrap(), b: 7.to_bigint().unwrap() };
-        assert!(Point::new_point(&curve, &-1.to_bigint().unwrap(), &-1.to_bigint().unwrap()).is_ok());
+        let curve = RealWeierstrassCurve {
+            a: 5.to_bigint().unwrap(),
+            b: 7.to_bigint().unwrap(),
+        };
+        assert!(
+            Point::new_point(&curve, &-1.to_bigint().unwrap(), &-1.to_bigint().unwrap()).is_ok()
+        );
     }
 
     #[test]
     fn test_create_valid_point_and_check_result() {
-        let curve = RealWeierstrassCurve { a: 5.to_bigint().unwrap(), b: 7.to_bigint().unwrap() };
+        let curve = RealWeierstrassCurve {
+            a: 5.to_bigint().unwrap(),
+            b: 7.to_bigint().unwrap(),
+        };
         let result = Point::new_point(&curve, &-1.to_bigint().unwrap(), &-1.to_bigint().unwrap());
         assert!(result.is_ok());
-    
+
         let point = result.unwrap();
-        assert_eq!(point, Point { coords: Coords::Point(-1.to_bigint().unwrap(), -1.to_bigint().unwrap()), curve: &curve });
+        assert_eq!(
+            point,
+            Point {
+                coords: Coords::Point(-1.to_bigint().unwrap(), -1.to_bigint().unwrap()),
+                curve: &curve
+            }
+        );
     }
 
     #[test]
     fn test_create_valid_point_at_infinity() {
-        let curve = RealWeierstrassCurve { a: 5.to_bigint().unwrap(), b: 7.to_bigint().unwrap() };
-        assert_eq!(Point::new_infinity(&curve), Point { coords: Coords::Infinity, curve: &curve });
+        let curve = RealWeierstrassCurve {
+            a: 5.to_bigint().unwrap(),
+            b: 7.to_bigint().unwrap(),
+        };
+        assert_eq!(
+            Point::new_infinity(&curve),
+            Point {
+                coords: Coords::Infinity,
+                curve: &curve
+            }
+        );
     }
 
     #[test]
     fn test_eq() {
-        let curve = RealWeierstrassCurve { a: 5.to_bigint().unwrap(), b: 7.to_bigint().unwrap() };
-        assert!(Point::new_infinity(&curve) == Point { coords: Coords::Infinity, curve: &curve });
-        assert!(Point { coords: Coords::Point(-1.to_bigint().unwrap(), -1.to_bigint().unwrap()), curve: &curve } == Point { coords: Coords::Point(-1.to_bigint().unwrap(), -1.to_bigint().unwrap()), curve: &curve });
-        assert!(Point { coords: Coords::Point(-1.to_bigint().unwrap(), -1.to_bigint().unwrap()), curve: &curve } != Point { coords: Coords::Point(-1.to_bigint().unwrap(), 1.to_bigint().unwrap()), curve: &curve });
-        assert!(Point { coords: Coords::Infinity, curve: &curve } != Point { coords: Coords::Point(-1.to_bigint().unwrap(), 1.to_bigint().unwrap()), curve: &curve });
+        let curve = RealWeierstrassCurve {
+            a: 5.to_bigint().unwrap(),
+            b: 7.to_bigint().unwrap(),
+        };
+        assert!(
+            Point::new_infinity(&curve)
+                == Point {
+                    coords: Coords::Infinity,
+                    curve: &curve
+                }
+        );
+        assert!(
+            Point {
+                coords: Coords::Point(-1.to_bigint().unwrap(), -1.to_bigint().unwrap()),
+                curve: &curve
+            } == Point {
+                coords: Coords::Point(-1.to_bigint().unwrap(), -1.to_bigint().unwrap()),
+                curve: &curve
+            }
+        );
+        assert!(
+            Point {
+                coords: Coords::Point(-1.to_bigint().unwrap(), -1.to_bigint().unwrap()),
+                curve: &curve
+            } != Point {
+                coords: Coords::Point(-1.to_bigint().unwrap(), 1.to_bigint().unwrap()),
+                curve: &curve
+            }
+        );
+        assert!(
+            Point {
+                coords: Coords::Infinity,
+                curve: &curve
+            } != Point {
+                coords: Coords::Point(-1.to_bigint().unwrap(), 1.to_bigint().unwrap()),
+                curve: &curve
+            }
+        );
     }
 
     #[test]
     fn test_add_infinity_to_point() {
-        let curve = RealWeierstrassCurve { a: 5.to_bigint().unwrap(), b: 7.to_bigint().unwrap() };
+        let curve = RealWeierstrassCurve {
+            a: 5.to_bigint().unwrap(),
+            b: 7.to_bigint().unwrap(),
+        };
         let infinity = Point::new_infinity(&curve);
-        let point = Point::new_point(&curve, &-1.to_bigint().unwrap(), &-1.to_bigint().unwrap()).unwrap();
+        let point =
+            Point::new_point(&curve, &-1.to_bigint().unwrap(), &-1.to_bigint().unwrap()).unwrap();
 
-        assert_eq!(infinity + point, Point::new_point(&curve, &-1.to_bigint().unwrap(), &-1.to_bigint().unwrap()).unwrap());
+        assert_eq!(
+            infinity + point,
+            Point::new_point(&curve, &-1.to_bigint().unwrap(), &-1.to_bigint().unwrap()).unwrap()
+        );
     }
 
     #[test]
     fn test_add_infinity_to_point_reverse() {
-        let curve = RealWeierstrassCurve { a: 5.to_bigint().unwrap(), b: 7.to_bigint().unwrap() };
+        let curve = RealWeierstrassCurve {
+            a: 5.to_bigint().unwrap(),
+            b: 7.to_bigint().unwrap(),
+        };
         let infinity = Point::new_infinity(&curve);
-        let point = Point::new_point(&curve, &-1.to_bigint().unwrap(), &-1.to_bigint().unwrap()).unwrap();
+        let point =
+            Point::new_point(&curve, &-1.to_bigint().unwrap(), &-1.to_bigint().unwrap()).unwrap();
 
-        assert_eq!(point + infinity, Point::new_point(&curve, &-1.to_bigint().unwrap(), &-1.to_bigint().unwrap()).unwrap());
+        assert_eq!(
+            point + infinity,
+            Point::new_point(&curve, &-1.to_bigint().unwrap(), &-1.to_bigint().unwrap()).unwrap()
+        );
     }
 
     #[test]
     fn test_add_vertical_line() {
         // This happens when points have the same x and different y coordinates
-        let curve = RealWeierstrassCurve { a: 5.to_bigint().unwrap(), b: 7.to_bigint().unwrap() };
-        let point1 = Point::new_point(&curve, &-1.to_bigint().unwrap(), &1.to_bigint().unwrap()).unwrap();
-        let point2 = Point::new_point(&curve, &-1.to_bigint().unwrap(), &-1.to_bigint().unwrap()).unwrap();
+        let curve = RealWeierstrassCurve {
+            a: 5.to_bigint().unwrap(),
+            b: 7.to_bigint().unwrap(),
+        };
+        let point1 =
+            Point::new_point(&curve, &-1.to_bigint().unwrap(), &1.to_bigint().unwrap()).unwrap();
+        let point2 =
+            Point::new_point(&curve, &-1.to_bigint().unwrap(), &-1.to_bigint().unwrap()).unwrap();
 
         assert_eq!(point1 + point2, Point::new_infinity(&curve));
     }
@@ -193,9 +274,14 @@ mod elliptic_curve_tests {
     #[test]
     fn test_add_same_point_with_vertical_slope() {
         // This happens when points are the same and have y == 0
-        let curve = RealWeierstrassCurve { a: 0.to_bigint().unwrap(), b: 0.to_bigint().unwrap() };
-        let point1 = Point::new_point(&curve, &0.to_bigint().unwrap(), &0.to_bigint().unwrap()).unwrap();
-        let point2 = Point::new_point(&curve, &0.to_bigint().unwrap(), &0.to_bigint().unwrap()).unwrap();
+        let curve = RealWeierstrassCurve {
+            a: 0.to_bigint().unwrap(),
+            b: 0.to_bigint().unwrap(),
+        };
+        let point1 =
+            Point::new_point(&curve, &0.to_bigint().unwrap(), &0.to_bigint().unwrap()).unwrap();
+        let point2 =
+            Point::new_point(&curve, &0.to_bigint().unwrap(), &0.to_bigint().unwrap()).unwrap();
 
         assert!(point1 == point2);
         assert_eq!(point1 + point2, Point::new_infinity(&curve));
@@ -204,22 +290,38 @@ mod elliptic_curve_tests {
     #[test]
     fn test_add_same_point() {
         // p(-1,-1) + p(-1,-1) = p(18,77)
-        let curve = RealWeierstrassCurve { a: 5.to_bigint().unwrap(), b: 7.to_bigint().unwrap() };
-        let point1 = Point::new_point(&curve, &-1.to_bigint().unwrap(), &-1.to_bigint().unwrap()).unwrap();
-        let point2 = Point::new_point(&curve, &-1.to_bigint().unwrap(), &-1.to_bigint().unwrap()).unwrap();
+        let curve = RealWeierstrassCurve {
+            a: 5.to_bigint().unwrap(),
+            b: 7.to_bigint().unwrap(),
+        };
+        let point1 =
+            Point::new_point(&curve, &-1.to_bigint().unwrap(), &-1.to_bigint().unwrap()).unwrap();
+        let point2 =
+            Point::new_point(&curve, &-1.to_bigint().unwrap(), &-1.to_bigint().unwrap()).unwrap();
 
         assert!(point1 == point2);
-        assert_eq!(point1 + point2, Point::new_point(&curve, &18.to_bigint().unwrap(), &77.to_bigint().unwrap()).unwrap());
+        assert_eq!(
+            point1 + point2,
+            Point::new_point(&curve, &18.to_bigint().unwrap(), &77.to_bigint().unwrap()).unwrap()
+        );
     }
 
     #[test]
     fn test_add_points_with_different_x() {
         // p(2,5) + p(-1,-1) = p(3,-7)
-        let curve = RealWeierstrassCurve { a: 5.to_bigint().unwrap(), b: 7.to_bigint().unwrap() };
-        let point1 = Point::new_point(&curve, &2.to_bigint().unwrap(), &5.to_bigint().unwrap()).unwrap();
-        let point2 = Point::new_point(&curve, &-1.to_bigint().unwrap(), &-1.to_bigint().unwrap()).unwrap();
+        let curve = RealWeierstrassCurve {
+            a: 5.to_bigint().unwrap(),
+            b: 7.to_bigint().unwrap(),
+        };
+        let point1 =
+            Point::new_point(&curve, &2.to_bigint().unwrap(), &5.to_bigint().unwrap()).unwrap();
+        let point2 =
+            Point::new_point(&curve, &-1.to_bigint().unwrap(), &-1.to_bigint().unwrap()).unwrap();
 
         assert!(point1 != point2);
-        assert_eq!(point1 + point2, Point::new_point(&curve, &3.to_bigint().unwrap(), &-7.to_bigint().unwrap()).unwrap());
+        assert_eq!(
+            point1 + point2,
+            Point::new_point(&curve, &3.to_bigint().unwrap(), &-7.to_bigint().unwrap()).unwrap()
+        );
     }
 }
