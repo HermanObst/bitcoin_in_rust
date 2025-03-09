@@ -72,10 +72,8 @@ impl Add for Point<'_, WeierstrassCurve> {
     fn add(self, other: Self) -> Self::Output {
         let curve = self.curve; // Ensure curve is accessible
         let curve_other = other.curve;
-        if curve != curve_other {
-            // TODO: Handle this case gracefully
-            panic!("Cannot add points on different curves");
-        }
+        // TODO: Handle this case gracefully
+assert!(!(curve != curve_other), "Cannot add points on different curves");
 
         match (&self.coords, &other.coords) {
             // If either operand is the identity (point at infinity), return the other.
