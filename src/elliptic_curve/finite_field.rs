@@ -2,12 +2,13 @@
 use num_bigint::BigInt;
 use std::ops::{Add, Div, Mul, Sub};
 use num_integer::Integer;
+use num_traits::Zero;
 
 
-#[derive(Debug, PartialEq, Eq)]
-struct FieldElement {
-    num: BigInt,
-    prime: BigInt,
+#[derive(Debug, PartialEq, Eq, Clone)]
+pub(crate) struct FieldElement {
+    pub(crate) num: BigInt,
+    pub(crate) prime: BigInt,
 }
 
 #[allow(dead_code)]
@@ -16,11 +17,19 @@ impl FieldElement {
         FieldElement { num, prime }
     }
 
-    fn pow(self, exp: &BigInt) -> FieldElement {
+    pub fn pow(self, exp: &BigInt) -> FieldElement {
         let prime_minus_one = &self.prime - 1; 
         let positive_exponent = exp.mod_floor(&prime_minus_one);
         let num = self.num.modpow(&positive_exponent, &self.prime);
         FieldElement::new(num, self.prime)
+    }
+
+    pub fn zero(prime: BigInt) -> FieldElement {
+        FieldElement { num: BigInt::zero(), prime }
+    }
+
+    pub fn prime(&self) -> BigInt {
+        self.prime.clone()
     }
 }
 
@@ -64,7 +73,6 @@ impl Div<FieldElement> for FieldElement {
         FieldElement::new(num, self.prime)
     }
 }
-
 
 #[cfg(test)]
 mod test {

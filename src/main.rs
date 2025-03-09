@@ -1,4 +1,3 @@
-mod point;
 mod elliptic_curve;
 mod types;
 
