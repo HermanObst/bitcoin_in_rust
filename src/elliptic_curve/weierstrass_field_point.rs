@@ -73,7 +73,10 @@ impl Add for Point<'_, WeierstrassCurve> {
         let curve = self.curve; // Ensure curve is accessible
         let curve_other = other.curve;
         // TODO: Handle this case gracefully
-assert!(!(curve != curve_other), "Cannot add points on different curves");
+        assert!(
+            !(curve != curve_other),
+            "Cannot add points on different curves"
+        );
 
         match (&self.coords, &other.coords) {
             // If either operand is the identity (point at infinity), return the other.

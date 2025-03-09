@@ -70,7 +70,10 @@ impl<'a> Point<'a, RealWeierstrassCurve> {
 impl PartialEq for Point<'_, RealWeierstrassCurve> {
     fn eq(&self, other: &Self) -> bool {
         // TODO: Handle this case gracefully
-assert!(!(self.curve != other.curve), "Cannot compare points on different curves");
+        assert!(
+            !(self.curve != other.curve),
+            "Cannot compare points on different curves"
+        );
 
         match (&self.coords, &other.coords) {
             (Coords::Point(x1, y1), Coords::Point(x2, y2)) => x1 == x2 && y1 == y2,
@@ -87,7 +90,10 @@ impl Add for Point<'_, RealWeierstrassCurve> {
         let curve = self.curve; // Ensure curve is accessible
         let curve_other = other.curve;
         // TODO: Handle this case gracefully
-assert!(!(curve != curve_other), "Cannot add points on different curves");
+        assert!(
+            !(curve != curve_other),
+            "Cannot add points on different curves"
+        );
 
         match (&self.coords, &other.coords) {
             // If either operand is the identity (point at infinity), return the other.
