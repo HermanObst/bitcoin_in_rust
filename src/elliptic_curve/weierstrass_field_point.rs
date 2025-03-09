@@ -183,6 +183,40 @@ mod weierstrass_field_point_tests {
         let r = Point::new_point(&curve, &xr, &yr).unwrap();
 
         assert_eq!(p1 + p2, r);
+
+        // Additional test cases
+        let x1 = FieldElement::new(BigInt::from(170), prime.clone());
+        let y1 = FieldElement::new(BigInt::from(142), prime.clone());
+        let x2 = FieldElement::new(BigInt::from(60), prime.clone());
+        let y2 = FieldElement::new(BigInt::from(139), prime.clone());
+        let p1 = Point::new_point(&curve, &x1, &y1).unwrap();
+        let p2 = Point::new_point(&curve, &x2, &y2).unwrap();
+        let xr = FieldElement::new(BigInt::from(220), prime.clone());
+        let yr = FieldElement::new(BigInt::from(181), prime.clone());
+        let r = Point::new_point(&curve, &xr, &yr).unwrap();
+        assert_eq!(p1 + p2, r);
+
+        let x1 = FieldElement::new(BigInt::from(47), prime.clone());
+        let y1 = FieldElement::new(BigInt::from(71), prime.clone());
+        let x2 = FieldElement::new(BigInt::from(17), prime.clone());
+        let y2 = FieldElement::new(BigInt::from(56), prime.clone());
+        let p1 = Point::new_point(&curve, &x1, &y1).unwrap();
+        let p2 = Point::new_point(&curve, &x2, &y2).unwrap();
+        let xr = FieldElement::new(BigInt::from(215), prime.clone());
+        let yr = FieldElement::new(BigInt::from(68), prime.clone());
+        let r = Point::new_point(&curve, &xr, &yr).unwrap();
+        assert_eq!(p1 + p2, r);
+
+        let x1 = FieldElement::new(BigInt::from(143), prime.clone());
+        let y1 = FieldElement::new(BigInt::from(98), prime.clone());
+        let x2 = FieldElement::new(BigInt::from(76), prime.clone());
+        let y2 = FieldElement::new(BigInt::from(66), prime.clone());
+        let p1 = Point::new_point(&curve, &x1, &y1).unwrap();
+        let p2 = Point::new_point(&curve, &x2, &y2).unwrap();
+        let xr = FieldElement::new(BigInt::from(47), prime.clone());
+        let yr = FieldElement::new(BigInt::from(71), prime.clone());
+        let r = Point::new_point(&curve, &xr, &yr).unwrap();
+        assert_eq!(p1 + p2, r);
     }
 
     #[test]
