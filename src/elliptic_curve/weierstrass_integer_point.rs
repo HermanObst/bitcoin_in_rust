@@ -67,7 +67,7 @@ impl<'a> Point<'a, RealWeierstrassCurve> {
     }
 }
 
-impl<'a> PartialEq for Point<'a, RealWeierstrassCurve> {
+impl PartialEq for Point<'_, RealWeierstrassCurve> {
     fn eq(&self, other: &Self) -> bool {
         if self.curve != other.curve {
             // TODO: Handle this case gracefully
@@ -82,7 +82,7 @@ impl<'a> PartialEq for Point<'a, RealWeierstrassCurve> {
     }
 }
 
-impl<'a> Add for Point<'a, RealWeierstrassCurve> {
+impl Add for Point<'_, RealWeierstrassCurve> {
     type Output = Self;
 
     fn add(self, other: Self) -> Self {

@@ -52,7 +52,7 @@ impl<'a> Point<'a, WeierstrassCurve> {
     }
 }
 
-impl<'a> PartialEq for Point<'a, WeierstrassCurve> {
+impl PartialEq for Point<'_, WeierstrassCurve> {
     fn eq(&self, other: &Self) -> bool {
         match (&self.coords, &other.coords) {
             (Coords::Point(x1, y1), Coords::Point(x2, y2)) => x1 == x2 && y1 == y2,
@@ -66,7 +66,7 @@ impl<'a> PartialEq for Point<'a, WeierstrassCurve> {
 // We could define them outside as constants and use referecnes to them
 // Similar, the prime number do not need to be cloned all the way around.
 // TODO: Implement aritmethics for &FieldElements to no need to clone all over the place
-impl<'a> Add for Point<'a, WeierstrassCurve> {
+impl Add for Point<'_, WeierstrassCurve> {
     type Output = Self;
 
     fn add(self, other: Self) -> Self::Output {
