@@ -1,16 +1,12 @@
-## Bitcoin Implementation in Rust
+## Bitcoin in Rust
 
-This repository, `bitcoin_implementation_in_rust`, is an endeavor to implement Bitcoin concepts and functionalities using the Rust programming language. It's inspired by the book "Programming Bitcoin" by Jimmy Song, available [here](https://www.oreilly.com/library/view/programming-bitcoin/9781492031482/). The book is a comprehensive guide to understanding the principles behind Bitcoin and provides a solid foundation for coding Bitcoin applications. This project aims to translate these principles into Rust, a language known for its performance and safety.
-
-### Project Description
-
-This project is a Rust-based implementation of Bitcoin. It focuses on creating a robust and efficient codebase that adheres to the concepts and methodologies discussed in "Programming Bitcoin". The choice of Rust as the programming language stems from its emphasis on safety, speed, and concurrency, making it an ideal candidate for implementing the critical and performance-sensitive aspects of Bitcoin.
+bitcoin_implementation_in_rust is a Bitcoin implementation with the focus on teaching the core concepts and functionalities using the Rust programming language. It's inspired by the book "Programming Bitcoin" by Jimmy Song., available [here](https://www.oreilly.com/library/view/programming-bitcoin/9781492031482/). 
 
 ### Goals and Objectives
 
 - **Understand Bitcoin**: Deepen the understanding of Bitcoin's underlying technology as presented in "Programming Bitcoin".
 - **Rust Programming**: Leverage Rust's features for building safe and efficient Bitcoin-related applications.
-- **Open Source Contribution**: Provide a resource for others interested in Bitcoin and Rust, facilitating learning and contributions.
+- **Open Sourcen**: Provide a resource for others interested in Bitcoin and Rust, facilitating learning and community.
 
 ### Getting Started
 
@@ -29,24 +25,14 @@ This project is a Rust-based implementation of Bitcoin. It focuses on creating a
      cargo build
      ```
 
-### Contribution Guidelines
-
-Contributors are welcome to enhance the features, fix bugs, or improve the documentation. Please adhere to the following guidelines:
-
-- Fork the repository and create your feature branch.
-- Write clean, modular, and testable code.
-- Ensure your code adheres to the existing style of the project.
-- Update the README.md with details of changes.
-- Submit a pull request with a comprehensive description of changes.
-
 ### License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
 ### Acknowledgments
 
-- Jimmy Song, the author of "Programming Bitcoin", for his invaluable insights into Bitcoin.
-- The Rust programming community for their continuous support and resources.
+- Jimmy Song, the author of "Programming Bitcoin"
+- The Rust programming community.
 
 ---
 
