@@ -1,4 +1,4 @@
-use bitcoin::types::errors::Errors;
+use crate::types::errors::Errors;
 use num_traits::identities::Zero;
 use num_bigint::BigInt;
 use core::ops::Add;
