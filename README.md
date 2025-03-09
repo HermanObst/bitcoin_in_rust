@@ -1,6 +1,6 @@
 ## Bitcoin in Rust
 
-bitcoin_implementation_in_rust is a Bitcoin implementation with the focus on teaching the core concepts and functionalities using the Rust programming language. It's inspired by the book "Programming Bitcoin" by Jimmy Song., available [here](https://www.oreilly.com/library/view/programming-bitcoin/9781492031482/). 
+bitcoin_in_rust is a Bitcoin implementation with the focus on teaching the core concepts and functionalities using the Rust programming language. It's inspired by the book "Programming Bitcoin" by Jimmy Song., available [here](https://www.oreilly.com/library/view/programming-bitcoin/9781492031482/). 
 
 ### Goals and Objectives
 
@@ -17,11 +17,11 @@ bitcoin_implementation_in_rust is a Bitcoin implementation with the focus on tea
 2. **Installation**:
    - Clone the repository:
      ```bash
-     git clone https://github.com/HermanObst/bitcoin_implementation_in_rust.git
+     git clone https://github.com/HermanObst/bitcoin_in_rust.git
      ```
    - Navigate to the project directory and build:
      ```bash
-     cd bitcoin_implementation_in_rust
+     cd bitcoin_in_rust
      cargo build
      ```
 
