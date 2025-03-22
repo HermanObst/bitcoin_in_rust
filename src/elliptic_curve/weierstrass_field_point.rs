@@ -10,9 +10,9 @@ use crate::elliptic_curve::{
 use crate::types::errors::Errors;
 
 #[derive(Debug, PartialEq, Clone)]
-struct WeierstrassCurve {
-    a: FieldElement,
-    b: FieldElement,
+pub struct WeierstrassCurve {
+    pub a: FieldElement,
+    pub b: FieldElement,
 }
 
 impl EllipticCurve for WeierstrassCurve {
@@ -32,7 +32,7 @@ impl EllipticCurve for WeierstrassCurve {
 
 #[allow(dead_code)]
 impl<'a> Point<'a, WeierstrassCurve> {
-    fn new_point(
+    pub fn new_point(
         curve: &'a WeierstrassCurve,
         x: &FieldElement,
         y: &FieldElement,
@@ -51,6 +51,14 @@ impl<'a> Point<'a, WeierstrassCurve> {
         Point {
             coords: Coords::Infinity,
             curve,
+        }
+    }
+
+    fn x(&self) -> FieldElement {
+        match self.coords.clone() {
+            Coords::Point(x, _) => x,
+            // TODO: Consider returning a Option<FieldElement>
+            Coords::Infinity => FieldElement::zero(self.curve.a().prime()),
         }
     }
 }
