@@ -10,7 +10,6 @@ pub(crate) struct FieldElement {
     pub(crate) prime: BigInt,
 }
 
-#[allow(dead_code)]
 impl FieldElement {
     pub fn new(num: BigInt, prime: BigInt) -> Self {
         FieldElement { num, prime }
@@ -168,6 +167,12 @@ mod test {
 
         assert_eq!(result.num, 15.to_bigint().unwrap());
         assert_eq!(result.prime, 31.to_bigint().unwrap());
+
+        let field_element2 = FieldElement::new(7.to_bigint().unwrap(), 13.to_bigint().unwrap());
+        let exp = -3.to_bigint().unwrap();
+        let result = field_element2.pow(&exp);
+
+        assert_eq!(result.num, 8.to_bigint().unwrap());
     }
 
     #[test]

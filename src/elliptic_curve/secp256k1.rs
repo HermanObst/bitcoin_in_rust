@@ -17,11 +17,12 @@ static SECP256K1_A: Lazy<FieldElement> =
     Lazy::new(|| FieldElement::new(0.into(), SECP256K1_PRIME.clone()));
 static SECP256K1_B: Lazy<FieldElement> =
     Lazy::new(|| FieldElement::new(7.into(), SECP256K1_PRIME.clone()));
-static SECP256K1_CURVE: Lazy<WeierstrassCurve> = Lazy::new(|| WeierstrassCurve {
+
+// SECP256K1 (Bitcoin) Curve
+pub static SECP256K1_CURVE: Lazy<WeierstrassCurve> = Lazy::new(|| WeierstrassCurve {
     a: SECP256K1_A.clone(),
     b: SECP256K1_B.clone(),
 });
-
 
 const SECP256K1_X_GENERATOR_HEX: &str =
     "79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798";
@@ -45,7 +46,8 @@ static SECP256K1_GY: Lazy<FieldElement> = Lazy::new(|| {
 static SECP256K1_ORDER: Lazy<BigInt> =
     Lazy::new(|| BigInt::from_str_radix(SECP256K1_ORDER_HEX, 16).unwrap());
 
-static SECP256K1_GENERATOR: Lazy<Point<WeierstrassCurve>> = Lazy::new(|| {
+// SECP256K1 (Bitcoin) Curve Generator
+pub static SECP256K1_GENERATOR: Lazy<Point<WeierstrassCurve>> = Lazy::new(|| {
     Point::<WeierstrassCurve>::new_point(&SECP256K1_CURVE, &SECP256K1_GX, &SECP256K1_GY).unwrap()
 });
 
