@@ -24,6 +24,10 @@ bitcoin_in_rust is a Bitcoin implementation with the focus on teaching the core 
      cd bitcoin_in_rust
      cargo build
      ```
+   - Run tests:
+     ```bash
+     cargo test
+     ```
 
 ### License
 
