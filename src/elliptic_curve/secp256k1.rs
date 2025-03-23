@@ -9,10 +9,12 @@ use once_cell::sync::Lazy;
 // Bitcoin secp256k1 prime = 2**256 - 2**32 - 977
 const SECP256K1_PRIME_HEX: &str =
     "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F";
-
 // TODO: Implement BigInt as an array. This would let it be known at compile time, thus removing the need of lazy
 static SECP256K1_PRIME: Lazy<BigInt> =
     Lazy::new(|| BigInt::from_str_radix(SECP256K1_PRIME_HEX, 16).unwrap());
+
+// SECP256K1 (Bitcoin) Curve has y² = x³ + ax + b with a = 0 and b = 7
+// y² = x³ + 7
 static SECP256K1_A: Lazy<FieldElement> =
     Lazy::new(|| FieldElement::new(0.into(), SECP256K1_PRIME.clone()));
 static SECP256K1_B: Lazy<FieldElement> =
