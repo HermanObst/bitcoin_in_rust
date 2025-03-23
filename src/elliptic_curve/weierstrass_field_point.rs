@@ -10,9 +10,9 @@ use crate::elliptic_curve::{
 use crate::types::errors::Errors;
 
 #[derive(Debug, PartialEq, Clone)]
-struct WeierstrassCurve {
-    a: FieldElement,
-    b: FieldElement,
+pub struct WeierstrassCurve {
+    pub a: FieldElement,
+    pub b: FieldElement,
 }
 
 impl EllipticCurve for WeierstrassCurve {
@@ -32,7 +32,7 @@ impl EllipticCurve for WeierstrassCurve {
 
 #[allow(dead_code)]
 impl<'a> Point<'a, WeierstrassCurve> {
-    fn new_point(
+    pub fn new_point(
         curve: &'a WeierstrassCurve,
         x: &FieldElement,
         y: &FieldElement,
@@ -41,16 +41,24 @@ impl<'a> Point<'a, WeierstrassCurve> {
             return Err(Errors::InvalidPoint);
         }
 
-        Ok(Point {
+        Ok(Self {
             coords: Coords::Point(x.clone(), y.clone()),
             curve,
         })
     }
 
-    fn new_infinity(curve: &'a WeierstrassCurve) -> Self {
-        Point {
+    pub fn new_infinity(curve: &'a WeierstrassCurve) -> Self {
+        Self {
             coords: Coords::Infinity,
             curve,
+        }
+    }
+
+    fn x(&self) -> FieldElement {
+        match self.coords.clone() {
+            Coords::Point(x, _) => x,
+            // TODO: Consider returning a Option<FieldElement>
+            Coords::Infinity => FieldElement::zero(self.curve.a().prime()),
         }
     }
 }
@@ -92,7 +100,7 @@ impl Add for Point<'_, WeierstrassCurve> {
                         // ---- Doubling case (P1 == P2) ----
                         if y1.is_zero() {
                             // Tangent line to the curve is vertical if y = 0, which results in infinity
-                            Point::new_infinity(curve)
+                            Self::new_infinity(curve)
                         } else {
                             // slope = (3*x1^2 + A) / (2*y1)
                             let numerator = FieldElement::new(3.into(), curve.a().prime())
@@ -106,18 +114,18 @@ impl Add for Point<'_, WeierstrassCurve> {
                             let x3 = slope.pow(&2.into())
                                 - FieldElement::new(2.into(), curve.a().prime()) * x1.clone();
                             let y3 = slope * (x1.clone() - x3.clone()) - y1.clone();
-                            Point::new_point(curve, &x3, &y3).unwrap()
+                            Self::new_point(curve, &x3, &y3).unwrap()
                         }
                     } else {
                         // ---- P1 = -P2 => vertical line => infinity. ----
-                        Point::new_infinity(curve)
+                        Self::new_infinity(curve)
                     }
                 } else {
                     // ---- Addition case (x1 != x2) ----
                     let slope = (y2.clone() - y1.clone()) / (x2.clone() - x1.clone());
                     let x3 = slope.pow(&2.into()) - x1.clone() - x2.clone();
                     let y3 = slope * (x1.clone() - x3.clone()) - y1.clone();
-                    Point::new_point(curve, &x3, &y3).unwrap()
+                    Self::new_point(curve, &x3, &y3).unwrap()
                 }
             }
         }
@@ -133,7 +141,7 @@ where
     fn mul(self, coefficient: T) -> Self {
         let mut coeff = coefficient.into();
         let mut current = self.clone();
-        let mut result = Point::new_infinity(self.curve);
+        let mut result = Self::new_infinity(self.curve);
 
         while coeff != BigInt::zero() {
             if coeff.clone() & BigInt::from(1) != BigInt::zero() {

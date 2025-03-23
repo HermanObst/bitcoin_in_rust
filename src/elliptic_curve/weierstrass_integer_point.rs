@@ -107,27 +107,27 @@ impl Add for Point<'_, RealWeierstrassCurve> {
                         // ---- Doubling case (P1 == P2) ----
                         if y1.is_zero() {
                             // Tangent line to the curve is vertical if y = 0, which results in infinity
-                            Point::new_infinity(curve)
+                            Self::new_infinity(curve)
                         } else {
                             // slope = (3*x1^2 + A) / (2*y1)
                             let numerator = BigInt::from(3) * x1.pow(2_u32) + curve.a();
                             let denominator = BigInt::from(2) * y1;
                             let slope = numerator / denominator;
 
-                            let x3 = slope.pow(2_u32) - (BigInt::from(2) * x1);
-                            let y3 = &slope * (x1 - &x3) - y1;
-                            Point::new_point(curve, &x3, &y3).unwrap()
+                            let x3: BigInt = slope.pow(2_u32) - (BigInt::from(2) * x1);
+                            let y3: BigInt = &slope * (x1 - &x3) - y1;
+                            Self::new_point(curve, &x3, &y3).unwrap()
                         }
                     } else {
                         // ---- P1 = -P2 => vertical line => infinity. ----
-                        Point::new_infinity(curve)
+                        Self::new_infinity(curve)
                     }
                 } else {
                     // ---- Addition case (x1 != x2) ----
                     let slope = (y2 - y1) / (x2 - x1);
-                    let x3 = slope.pow(2_u32) - x1 - x2;
-                    let y3 = &slope * (x1 - &x3) - y1;
-                    Point::new_point(curve, &x3, &y3).unwrap()
+                    let x3: BigInt = slope.pow(2_u32) - x1 - x2;
+                    let y3: BigInt = &slope * (x1 - &x3) - y1;
+                    Self::new_point(curve, &x3, &y3).unwrap()
                 }
             }
         }
@@ -145,9 +145,12 @@ mod elliptic_curve_tests {
             a: 5.to_bigint().unwrap(),
             b: 7.to_bigint().unwrap(),
         };
-        assert!(
-            Point::new_point(&curve, &-1.to_bigint().unwrap(), &-1.to_bigint().unwrap()).is_ok()
-        );
+        assert!(Point::<RealWeierstrassCurve>::new_point(
+            &curve,
+            &-1.to_bigint().unwrap(),
+            &-1.to_bigint().unwrap()
+        )
+        .is_ok());
     }
 
     #[test]
@@ -156,7 +159,11 @@ mod elliptic_curve_tests {
             a: 5.to_bigint().unwrap(),
             b: 7.to_bigint().unwrap(),
         };
-        let result = Point::new_point(&curve, &-1.to_bigint().unwrap(), &-1.to_bigint().unwrap());
+        let result = Point::<RealWeierstrassCurve>::new_point(
+            &curve,
+            &-1.to_bigint().unwrap(),
+            &-1.to_bigint().unwrap(),
+        );
         assert!(result.is_ok());
 
         let point = result.unwrap();
@@ -176,7 +183,7 @@ mod elliptic_curve_tests {
             b: 7.to_bigint().unwrap(),
         };
         assert_eq!(
-            Point::new_infinity(&curve),
+            Point::<RealWeierstrassCurve>::new_infinity(&curve),
             Point {
                 coords: Coords::Infinity,
                 curve: &curve
@@ -191,7 +198,7 @@ mod elliptic_curve_tests {
             b: 7.to_bigint().unwrap(),
         };
         assert!(
-            Point::new_infinity(&curve)
+            Point::<RealWeierstrassCurve>::new_infinity(&curve)
                 == Point {
                     coords: Coords::Infinity,
                     curve: &curve
@@ -232,13 +239,22 @@ mod elliptic_curve_tests {
             a: 5.to_bigint().unwrap(),
             b: 7.to_bigint().unwrap(),
         };
-        let infinity = Point::new_infinity(&curve);
-        let point =
-            Point::new_point(&curve, &-1.to_bigint().unwrap(), &-1.to_bigint().unwrap()).unwrap();
+        let infinity = Point::<RealWeierstrassCurve>::new_infinity(&curve);
+        let point = Point::<RealWeierstrassCurve>::new_point(
+            &curve,
+            &-1.to_bigint().unwrap(),
+            &-1.to_bigint().unwrap(),
+        )
+        .unwrap();
 
         assert_eq!(
             infinity + point,
-            Point::new_point(&curve, &-1.to_bigint().unwrap(), &-1.to_bigint().unwrap()).unwrap()
+            Point::<RealWeierstrassCurve>::new_point(
+                &curve,
+                &-1.to_bigint().unwrap(),
+                &-1.to_bigint().unwrap()
+            )
+            .unwrap()
         );
     }
 
@@ -248,13 +264,22 @@ mod elliptic_curve_tests {
             a: 5.to_bigint().unwrap(),
             b: 7.to_bigint().unwrap(),
         };
-        let infinity = Point::new_infinity(&curve);
-        let point =
-            Point::new_point(&curve, &-1.to_bigint().unwrap(), &-1.to_bigint().unwrap()).unwrap();
+        let infinity = Point::<RealWeierstrassCurve>::new_infinity(&curve);
+        let point = Point::<RealWeierstrassCurve>::new_point(
+            &curve,
+            &-1.to_bigint().unwrap(),
+            &-1.to_bigint().unwrap(),
+        )
+        .unwrap();
 
         assert_eq!(
             point + infinity,
-            Point::new_point(&curve, &-1.to_bigint().unwrap(), &-1.to_bigint().unwrap()).unwrap()
+            Point::<RealWeierstrassCurve>::new_point(
+                &curve,
+                &-1.to_bigint().unwrap(),
+                &-1.to_bigint().unwrap()
+            )
+            .unwrap()
         );
     }
 
@@ -265,12 +290,23 @@ mod elliptic_curve_tests {
             a: 5.to_bigint().unwrap(),
             b: 7.to_bigint().unwrap(),
         };
-        let point1 =
-            Point::new_point(&curve, &-1.to_bigint().unwrap(), &1.to_bigint().unwrap()).unwrap();
-        let point2 =
-            Point::new_point(&curve, &-1.to_bigint().unwrap(), &-1.to_bigint().unwrap()).unwrap();
+        let point1 = Point::<RealWeierstrassCurve>::new_point(
+            &curve,
+            &-1.to_bigint().unwrap(),
+            &1.to_bigint().unwrap(),
+        )
+        .unwrap();
+        let point2 = Point::<RealWeierstrassCurve>::new_point(
+            &curve,
+            &-1.to_bigint().unwrap(),
+            &-1.to_bigint().unwrap(),
+        )
+        .unwrap();
 
-        assert_eq!(point1 + point2, Point::new_infinity(&curve));
+        assert_eq!(
+            point1 + point2,
+            Point::<RealWeierstrassCurve>::new_infinity(&curve)
+        );
     }
 
     #[test]
@@ -280,13 +316,24 @@ mod elliptic_curve_tests {
             a: 0.to_bigint().unwrap(),
             b: 0.to_bigint().unwrap(),
         };
-        let point1 =
-            Point::new_point(&curve, &0.to_bigint().unwrap(), &0.to_bigint().unwrap()).unwrap();
-        let point2 =
-            Point::new_point(&curve, &0.to_bigint().unwrap(), &0.to_bigint().unwrap()).unwrap();
+        let point1 = Point::<RealWeierstrassCurve>::new_point(
+            &curve,
+            &0.to_bigint().unwrap(),
+            &0.to_bigint().unwrap(),
+        )
+        .unwrap();
+        let point2 = Point::<RealWeierstrassCurve>::new_point(
+            &curve,
+            &0.to_bigint().unwrap(),
+            &0.to_bigint().unwrap(),
+        )
+        .unwrap();
 
         assert!(point1 == point2);
-        assert_eq!(point1 + point2, Point::new_infinity(&curve));
+        assert_eq!(
+            point1 + point2,
+            Point::<RealWeierstrassCurve>::new_infinity(&curve)
+        );
     }
 
     #[test]
@@ -296,15 +343,28 @@ mod elliptic_curve_tests {
             a: 5.to_bigint().unwrap(),
             b: 7.to_bigint().unwrap(),
         };
-        let point1 =
-            Point::new_point(&curve, &-1.to_bigint().unwrap(), &-1.to_bigint().unwrap()).unwrap();
-        let point2 =
-            Point::new_point(&curve, &-1.to_bigint().unwrap(), &-1.to_bigint().unwrap()).unwrap();
+        let point1 = Point::<RealWeierstrassCurve>::new_point(
+            &curve,
+            &-1.to_bigint().unwrap(),
+            &-1.to_bigint().unwrap(),
+        )
+        .unwrap();
+        let point2 = Point::<RealWeierstrassCurve>::new_point(
+            &curve,
+            &-1.to_bigint().unwrap(),
+            &-1.to_bigint().unwrap(),
+        )
+        .unwrap();
 
         assert!(point1 == point2);
         assert_eq!(
             point1 + point2,
-            Point::new_point(&curve, &18.to_bigint().unwrap(), &77.to_bigint().unwrap()).unwrap()
+            Point::<RealWeierstrassCurve>::new_point(
+                &curve,
+                &18.to_bigint().unwrap(),
+                &77.to_bigint().unwrap()
+            )
+            .unwrap()
         );
     }
 
@@ -315,15 +375,28 @@ mod elliptic_curve_tests {
             a: 5.to_bigint().unwrap(),
             b: 7.to_bigint().unwrap(),
         };
-        let point1 =
-            Point::new_point(&curve, &2.to_bigint().unwrap(), &5.to_bigint().unwrap()).unwrap();
-        let point2 =
-            Point::new_point(&curve, &-1.to_bigint().unwrap(), &-1.to_bigint().unwrap()).unwrap();
+        let point1 = Point::<RealWeierstrassCurve>::new_point(
+            &curve,
+            &2.to_bigint().unwrap(),
+            &5.to_bigint().unwrap(),
+        )
+        .unwrap();
+        let point2 = Point::<RealWeierstrassCurve>::new_point(
+            &curve,
+            &-1.to_bigint().unwrap(),
+            &-1.to_bigint().unwrap(),
+        )
+        .unwrap();
 
         assert!(point1 != point2);
         assert_eq!(
             point1 + point2,
-            Point::new_point(&curve, &3.to_bigint().unwrap(), &-7.to_bigint().unwrap()).unwrap()
+            Point::<RealWeierstrassCurve>::new_point(
+                &curve,
+                &3.to_bigint().unwrap(),
+                &-7.to_bigint().unwrap()
+            )
+            .unwrap()
         );
     }
 }

@@ -9,5 +9,6 @@ edition = "2021"
 num-bigint = "0.4"
 num-integer = "0.1"
 num-traits = "0.2"
+once_cell = "1.19"
 thiserror = { version = "1.0.32", default-features = false }
 anyhow = "1.0"
